@@ -94,8 +94,10 @@ public class AI {
 			}
 
 			// BFS part
+			Vector<Position> vis = new Vector<Position>();
 			Queue<info> Q = new LinkedList<info>();
 			Q.add(new info(null, 0, c.getPos()));
+			vis.add(c.getPos());
 			int lvl = 1;
 
 			while (!Q.isEmpty()) {
@@ -112,7 +114,7 @@ public class AI {
 
 				for (Direction d : Direction.values()) {
 					int score = inf.score;
-
+					
 					// get block
 					Block b = null;
 					try {
@@ -177,7 +179,7 @@ public class AI {
 								&& lastPos.get(c.getId()).y == inf.pos
 										.getNextPos(d).y) {
 							score -= 4000;
-							System.out.println("roo xodesh");
+							//System.out.println("roo xodesh");
 						}
 
 						boolean skip = false;
@@ -202,7 +204,7 @@ public class AI {
 							inf.pos.getNextPos(d).y) == 2) {
 						score -= 40;
 					} else {
-						// System.out.println("YES");
+						//System.out.println("YES");
 						score += 10000;
 					}
 
@@ -228,10 +230,13 @@ public class AI {
 
 			Direction last_direction = Direction.values()[rnd.nextInt(6)];
 
-			while (!Q.isEmpty()) {
-				info i = Q.peek();
-				Q.remove();
-				// System.out.print("emitaz: " + i.score);
+			while (!Q.isEmpty()) {		
+				info i = Q.poll();
+				
+				if(visited(c.getPos().getNextPos(i.d), vis)) {
+					System.out.println("ID : " + c.getId() + " POS : " + c.getPos().x + " " + c.getPos().y);
+					continue;	// ignore move X((((
+				}
 
 				if (i.score > max_score) {
 					max_score = i.score;
@@ -243,12 +248,13 @@ public class AI {
 			// move
 			lastPos.put(c.getId(), c.getPos());
 			addVisited(c.getId(), c.getPos().getNextPos(last_direction).x, c.getPos().getNextPos(last_direction).y);
+			vis.add(c.getPos());
 			try {
 				Block b = world.getMap().at(
 						c.getPos().getNextPos(last_direction));
 				c.move(last_direction);
-				System.out.println("ID : " + c.getId() + " DIR : "
-						+ last_direction);
+				//System.out.println("ID : " + c.getId() + " DIR : "
+					//	+ last_direction);
 			} catch (Exception e) {
 				System.out.println("eeeeeeeeeeeeeeeeeeeeee");
 			}
@@ -256,6 +262,15 @@ public class AI {
 		}
 	}
 
+	public static boolean visited(Position chk, Vector<Position> pos) {
+		
+		for(Position p : pos) {
+			if(p.x == chk.x && p.y == chk.y)
+				return true;
+		}
+		return false;
+	}
+	
 }
 
 class info {
