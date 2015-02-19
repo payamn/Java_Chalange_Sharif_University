@@ -66,12 +66,14 @@ public class AI {
 			} else {
 				HashMap<String, Integer> a1 = new HashMap<String, Integer>();
 				a1.put(id, 1);
+				a.put(y,a1);
 			}
 		} else {
 			HashMap<Integer, HashMap<String, Integer>> a = new HashMap<Integer, HashMap<String, Integer>>();
 			HashMap<String, Integer> a1 = new HashMap<String, Integer>();
 			a1.put(id, 1);
 			a.put(x, a1);
+			visitedMap.put(x, a);
 		}
 	}
 
@@ -135,11 +137,11 @@ public class AI {
 
 						if (c.getEnergy() >= Constants.CELL_MIN_ENERGY_FOR_MITOSIS
 								&& lvl == 1) {
-							score += 1200;
+							score += 12000;
 						}
 
 						else if (c.getEnergy() >= Constants.CELL_MIN_ENERGY_FOR_MITOSIS) {
-							score += 120;
+							score += 1200;
 						}
 
 					} else if (b.getType()
@@ -181,7 +183,7 @@ public class AI {
 										.getNextPos(d).x
 								&& lastPos.get(c.getId()).y == inf.pos
 										.getNextPos(d).y) {
-							score -= 4000;
+							//score -= 4000;
 							//System.out.println("roo xodesh");
 						}
 
@@ -201,7 +203,8 @@ public class AI {
 					// visited
 					int visited = isVisitedBy(c.getId(), inf.pos.getNextPos(d).x,
 							inf.pos.getNextPos(d).y);
-					if ( visited>=0) {
+					if ( visited>0) {
+						System.out.println(visited);
 						score -= 100*visited;
 					} else if (visited == -1) {
 						score -= 40;
