@@ -29,11 +29,19 @@ public class AI {
 	private static Vector<Position> ResourceBlocks = new Vector<Position>();
 	private static Vector<Position> notFound = new Vector<Position>();
 	private static HashMap<String, Position> lastPos = new HashMap<String, Position>();
+	private static HashMap<Cell, Vector<Position>> cell_visited = new HashMap<Cell, Vector<Position>>();
 	Random rnd = new Random();
 
 	public void doTurn(World world) {
 
-		final long startTime = System.nanoTime();
+		for(Cell c : world.getMyCells()) {
+			if(!cell_visited.containsKey(c)) {
+				Vector<Position> v = new Vector<Position>();
+				v.add(c.getPos());
+				cell_visited.put(c, v);
+			}
+		}
+		
 
 		for (Cell c : world.getMyCells()) {
 			// System.out.println(c.getId());
@@ -79,6 +87,10 @@ public class AI {
 						continue;
 					}
 
+					// bug fix -> impassible check
+					if(b.getType().equals(Constants.BLOCK_TYPE_IMPASSABLE))
+						continue; // goto next direction
+					
 					if (b.getType().equals(Constants.BLOCK_TYPE_MITOSIS)) {
 						MitosisBlocks.add(inf.pos.getNextPos(d));
 
@@ -130,7 +142,7 @@ public class AI {
 										.getNextPos(d).x
 								&& lastPos.get(c.getId()).y == inf.pos
 										.getNextPos(d).y) {
-							score -= 100;
+							score -= 1000;
 						}
 						
 						boolean skip = false;
@@ -144,6 +156,15 @@ public class AI {
 						}
 						if (skip)
 							continue;
+					}
+					
+					// visited
+					if(cell_visited.get(c).contains(inf.pos.getNextPos(d))) {
+						score -= 100;
+					}
+					else { 
+						//System.out.println("YES");
+						score += 10000;
 					}
 
 					// push
@@ -179,10 +200,18 @@ public class AI {
 				}
 			}
 
-			System.out.println(max_score);
+			//System.out.println(max_score);
 			// move
 			lastPos.put(c.getId(), c.getPos());
-			c.move(last_direction);
+			cell_visited.get(c).add(c.getPos().getNextPos(last_direction));
+			try {
+				Block b = world.getMap().at(c.getPos().getNextPos(last_direction));
+				c.move(last_direction);
+				System.out.println("ID : " + c.getId() + " DIR : " + last_direction);
+			} catch (Exception e) {
+				System.out.println("eeeeeeeeeeeeeeeeeeeeee");
+			}
+			
 
 		}
 	}
@@ -193,7 +222,7 @@ class info {
 	public Direction d;
 	public int score;
 	public Position pos;
-	// add sizze of path
+	public short path_size;
 
 	public info(Direction d, int score, Position p) {
 		this.d = d;
