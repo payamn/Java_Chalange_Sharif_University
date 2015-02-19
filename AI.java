@@ -33,21 +33,21 @@ public class AI {
 	private static HashMap<String, Position> lastPos = new HashMap<String, Position>();
 	// private static HashMap<Cell, Vector<Position>> cell_visited = new
 	// HashMap<Cell, Vector<Position>>();
-	private static HashMap<Integer, HashMap<Integer, HashMap<String, Boolean>>> visitedMap = new HashMap<Integer, HashMap<Integer, HashMap<String, Boolean>>>();
+	private static HashMap<Integer, HashMap<Integer, HashMap<String, Integer>>> visitedMap = new HashMap<Integer, HashMap<Integer, HashMap<String, Integer>>>();
 	Random rnd = new Random();
 
 	private int isVisitedBy(String id, int x, int y) { // 2 means found but not
-														// with this id, 1 means
+													// with this id, 1 means
 														// found and this cell
 														// visit it before
 		if (visitedMap.containsKey(x)) {
-			HashMap<Integer, HashMap<String, Boolean>> a = visitedMap.get(x);
+			HashMap<Integer, HashMap<String, Integer>> a = visitedMap.get(x);
 			if (a.containsKey(y)) {
-				HashMap<String, Boolean> a1 = a.get(y);
+				HashMap<String, Integer> a1 = a.get(y);
 				if (a1.containsKey(id)) {
-					return 1;
+					return a1.get(id);
 				} else {
-					return 2;
+					return -1;
 				}
 			}
 		}
@@ -56,18 +56,21 @@ public class AI {
 
 	private void addVisited(String id, int x, int y) {
 		if (visitedMap.containsKey(x)) {
-			HashMap<Integer, HashMap<String, Boolean>> a = visitedMap.get(x);
+			HashMap<Integer, HashMap<String, Integer>> a = visitedMap.get(x);
 			if (a.containsKey(y)) {
-				HashMap<String, Boolean> a1 = a.get(y);
-				a1.put(id, true);
+				HashMap<String, Integer> a1 = a.get(y);
+				if (a1.containsKey(id)) {
+					a1.put(id, a1.get(id) + 1);
+				} else
+					a1.put(id, 1);
 			} else {
-				HashMap<String, Boolean> a1 = new HashMap<String, Boolean>();
-				a1.put(id, true);
+				HashMap<String, Integer> a1 = new HashMap<String, Integer>();
+				a1.put(id, 1);
 			}
 		} else {
-			HashMap<Integer, HashMap<String, Boolean>> a = new HashMap<Integer, HashMap<String, Boolean>>();
-			HashMap<String, Boolean> a1 = new HashMap<String, Boolean>();
-			a1.put(id, true);
+			HashMap<Integer, HashMap<String, Integer>> a = new HashMap<Integer, HashMap<String, Integer>>();
+			HashMap<String, Integer> a1 = new HashMap<String, Integer>();
+			a1.put(id, 1);
 			a.put(x, a1);
 		}
 	}
@@ -196,12 +199,11 @@ public class AI {
 					}
 
 					// visited
-
-					if (isVisitedBy(c.getId(), inf.pos.getNextPos(d).x,
-							inf.pos.getNextPos(d).y) == 1) {
-						score -= 100;
-					} else if (isVisitedBy(c.getId(), inf.pos.getNextPos(d).x,
-							inf.pos.getNextPos(d).y) == 2) {
+					int visited = isVisitedBy(c.getId(), inf.pos.getNextPos(d).x,
+							inf.pos.getNextPos(d).y);
+					if ( visited>=0) {
+						score -= 100*visited;
+					} else if (visited == -1) {
 						score -= 40;
 					} else {
 						//System.out.println("YES");
@@ -263,14 +265,14 @@ public class AI {
 	}
 
 	public static boolean visited(Position chk, Vector<Position> pos) {
-		
-		for(Position p : pos) {
-			if(p.x == chk.x && p.y == chk.y)
+
+		for (Position p : pos) {
+			if (p.x == chk.x && p.y == chk.y)
 				return true;
 		}
 		return false;
 	}
-	
+
 }
 
 class info {
