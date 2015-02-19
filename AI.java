@@ -50,15 +50,24 @@ public class AI {
 				continue;
 			}
 
+			
+			// BFS part
 			Queue<info> Q = new LinkedList<info>();
 			Q.add(new info(null, 0, c.getPos()));
-			int lvl = MAX_LEVEL;
-
-			// BFS
-			while (lvl >= 0) {
-				-- lvl;
+			int lvl = 1;
+			
+			while (!Q.isEmpty()) {
 				info inf = Q.poll();
+				
+				// set level
+				if(Math.abs(inf.pos.x - c.getPos().x) != 0)
+					lvl = Math.abs(inf.pos.x - c.getPos().x) + 1;
+				else if(Math.abs(inf.pos.y - c.getPos().y) != 0)
+					lvl = Math.abs(inf.pos.y - c.getPos().y) + 1;
 
+				if(lvl == MAX_LEVEL)
+					break;
+				
 				for (Direction d : Direction.values()) {
 					int score = inf.score;
 
@@ -66,7 +75,6 @@ public class AI {
 					Block b = null;
 					try {
 						b = world.getMap().at(inf.pos.getNextPos(d));
-						System.out.println(b.getType());
 					} catch (Exception e) {
 						continue;
 					}
@@ -74,7 +82,7 @@ public class AI {
 					if (b.getType().equals(Constants.BLOCK_TYPE_MITOSIS)) {
 						MitosisBlocks.add(inf.pos.getNextPos(d));
 
-						if (c.getEnergy() >= Constants.CELL_MIN_ENERGY_FOR_MITOSIS && lvl == MAX_LEVEL - 1) {
+						if (c.getEnergy() >= Constants.CELL_MIN_ENERGY_FOR_MITOSIS && lvl == 1) {
 							score += 1200;
 						}
 
@@ -87,7 +95,7 @@ public class AI {
 						ResourceBlocks.add(inf.pos.getNextPos(d));
 
 						if (c.getEnergy() < Constants.CELL_MIN_ENERGY_FOR_MITOSIS
-								&& b.getResource() > 0 && lvl == MAX_LEVEL - 1) {
+								&& b.getResource() > 0 && lvl == 1) {
 							score += 900;
 						}
 						else if (c.getEnergy() < Constants.CELL_MIN_ENERGY_FOR_MITOSIS
@@ -96,7 +104,6 @@ public class AI {
 						}
 					} else if (b.getType().equals(Constants.BLOCK_TYPE_NONE)) {
 						notFound.add(inf.pos.getNextPos(d));
-						System.out.println("NONE BLOCK");
 						score += 5000;
 						
 					} else if (b.getType().equals(Constants.BLOCK_TYPE_NORMAL)) {
@@ -105,7 +112,6 @@ public class AI {
 							Constants.BLOCK_TYPE_IMPASSABLE)
 							&& b.getHeight()
 									- world.getMap().at(inf.pos).getHeight() > 2) {
-						// System.out.println("nemishe raft");
 						continue;
 					} else if (!b.getType().equals(
 							Constants.BLOCK_TYPE_IMPASSABLE)
@@ -114,24 +120,21 @@ public class AI {
 
 						if (world.getMyCells().size() == 1) {
 							score -= 5000000;
-							// System.out.println("man yekiam");
 						} else {
 							score -= 50;
-							// System.out.println("bishtaram");
 						}
 					}
-					if (lvl == MAX_LEVEL - 1) {
-						// System.out.println(lastPos.get(c.getId()).x+" "+
-						// lastPos.get(c.getId()).y);
+					if (lvl == 1) {
 						if (lastPos.get(c.getId()) != null
 								&& lastPos.get(c.getId()).x == inf.pos
 										.getNextPos(d).x
 								&& lastPos.get(c.getId()).y == inf.pos
 										.getNextPos(d).y) {
 							score -= 100;
-							// System.out.println("yess ghablie");
 						}
+						
 						boolean skip = false;
+						
 						for (Cell c1 : world.getMyCells()) {
 							if (c1.getPos().x == inf.pos.getNextPos(d).x
 									&& c1.getPos().y == inf.pos.getNextPos(d).y) {
@@ -145,7 +148,7 @@ public class AI {
 
 					// push
 					info i = new info();
-					if (lvl == MAX_LEVEL - 1) {
+					if (lvl == 1) {
 						i.d = d;
 						i.score = score;
 						i.pos = inf.pos.getNextPos(d);
@@ -156,8 +159,6 @@ public class AI {
 					}
 
 					Q.add(i);
-					// System.out.println("score direction " + i.d + " score: "
-					// 		+ i.score);
 				}
 
 			}
@@ -177,28 +178,13 @@ public class AI {
 					last_direction = i.d;
 				}
 			}
-			// System.out.println("");
 
-			// baiad badan emtiaz bedim baraye kash va emtiaz va mitosis
-			/*
-			 * if (max_score<=80){ if (c.getEnergy() >=
-			 * Constants.CELL_MIN_ENERGY_FOR_MITOSIS &&
-			 * !MitosisBlocks.isEmpty()){ int minDistance = Integer.MAX_VALUE;
-			 * for (Position p : MitosisBlocks){
-			 * 
-			 * } }
-			 * 
-			 * 
-			 * }
-			 */
+			System.out.println(max_score);
 			// move
 			lastPos.put(c.getId(), c.getPos());
-			// System.out.println(c.getId()+" "+c.getPos().x+" "+c.getPos().y);
-			//c.move(last_direction);
+			c.move(last_direction);
 
 		}
-		long time = System.nanoTime() - startTime;
-		//System.out.println("time :" + time);
 	}
 
 }
