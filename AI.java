@@ -16,6 +16,8 @@ import java.util.Vector;
 
 import javax.swing.plaf.basic.BasicInternalFrameTitlePane.MaximizeAction;
 
+import com.sun.org.apache.bcel.internal.generic.NEW;
+
 /**
  * AI class. You should fill body of the method {@link #doTurn}. Do not change
  * name or modifiers of the methods or fields. You can add as many methods or
@@ -29,19 +31,52 @@ public class AI {
 	private static Vector<Position> ResourceBlocks = new Vector<Position>();
 	private static Vector<Position> notFound = new Vector<Position>();
 	private static HashMap<String, Position> lastPos = new HashMap<String, Position>();
-	private static HashMap<Cell, Vector<Position>> cell_visited = new HashMap<Cell, Vector<Position>>();
+	// private static HashMap<Cell, Vector<Position>> cell_visited = new
+	// HashMap<Cell, Vector<Position>>();
+	private static HashMap<Integer, HashMap<Integer, HashMap<String, Boolean>>> visitedMap = new HashMap<Integer, HashMap<Integer, HashMap<String, Boolean>>>();
 	Random rnd = new Random();
+
+	private int isVisitedBy(String id, int x, int y) { // 2 means found but not
+														// with this id, 1 means
+														// found and this cell
+														// visit it before
+		if (visitedMap.containsKey(x)) {
+			HashMap<Integer, HashMap<String, Boolean>> a = visitedMap.get(x);
+			if (a.containsKey(y)) {
+				HashMap<String, Boolean> a1 = a.get(y);
+				if (a1.containsKey(id)) {
+					return 1;
+				} else {
+					return 2;
+				}
+			}
+		}
+		return 0;
+	}
+
+	private void addVisited(String id, int x, int y) {
+		if (visitedMap.containsKey(x)) {
+			HashMap<Integer, HashMap<String, Boolean>> a = visitedMap.get(x);
+			if (a.containsKey(y)) {
+				HashMap<String, Boolean> a1 = a.get(y);
+				a1.put(id, true);
+			} else {
+				HashMap<String, Boolean> a1 = new HashMap<String, Boolean>();
+				a1.put(id, true);
+			}
+		} else {
+			HashMap<Integer, HashMap<String, Boolean>> a = new HashMap<Integer, HashMap<String, Boolean>>();
+			HashMap<String, Boolean> a1 = new HashMap<String, Boolean>();
+			a1.put(id, true);
+			a.put(x, a1);
+		}
+	}
 
 	public void doTurn(World world) {
 
-		for(Cell c : world.getMyCells()) {
-			if(!cell_visited.containsKey(c)) {
-				Vector<Position> v = new Vector<Position>();
-				v.add(c.getPos());
-				cell_visited.put(c, v);
-			}
+		for (Cell c : world.getMyCells()) {
+			addVisited(c.getId(), c.getPos().x, c.getPos().y);
 		}
-		
 
 		for (Cell c : world.getMyCells()) {
 			// System.out.println(c.getId());
@@ -58,24 +93,23 @@ public class AI {
 				continue;
 			}
 
-			
 			// BFS part
 			Queue<info> Q = new LinkedList<info>();
 			Q.add(new info(null, 0, c.getPos()));
 			int lvl = 1;
-			
+
 			while (!Q.isEmpty()) {
 				info inf = Q.poll();
-				
+
 				// set level
-				if(Math.abs(inf.pos.x - c.getPos().x) != 0)
+				if (Math.abs(inf.pos.x - c.getPos().x) != 0)
 					lvl = Math.abs(inf.pos.x - c.getPos().x) + 1;
-				else if(Math.abs(inf.pos.y - c.getPos().y) != 0)
+				else if (Math.abs(inf.pos.y - c.getPos().y) != 0)
 					lvl = Math.abs(inf.pos.y - c.getPos().y) + 1;
 
-				if(lvl == MAX_LEVEL)
+				if (lvl == MAX_LEVEL)
 					break;
-				
+
 				for (Direction d : Direction.values()) {
 					int score = inf.score;
 
@@ -88,13 +122,14 @@ public class AI {
 					}
 
 					// bug fix -> impassible check
-					if(b.getType().equals(Constants.BLOCK_TYPE_IMPASSABLE))
+					if (b.getType().equals(Constants.BLOCK_TYPE_IMPASSABLE))
 						continue; // goto next direction
-					
+
 					if (b.getType().equals(Constants.BLOCK_TYPE_MITOSIS)) {
 						MitosisBlocks.add(inf.pos.getNextPos(d));
 
-						if (c.getEnergy() >= Constants.CELL_MIN_ENERGY_FOR_MITOSIS && lvl == 1) {
+						if (c.getEnergy() >= Constants.CELL_MIN_ENERGY_FOR_MITOSIS
+								&& lvl == 1) {
 							score += 1200;
 						}
 
@@ -109,15 +144,14 @@ public class AI {
 						if (c.getEnergy() < Constants.CELL_MIN_ENERGY_FOR_MITOSIS
 								&& b.getResource() > 0 && lvl == 1) {
 							score += 900;
-						}
-						else if (c.getEnergy() < Constants.CELL_MIN_ENERGY_FOR_MITOSIS
+						} else if (c.getEnergy() < Constants.CELL_MIN_ENERGY_FOR_MITOSIS
 								&& b.getResource() > 0) {
 							score += 90;
 						}
 					} else if (b.getType().equals(Constants.BLOCK_TYPE_NONE)) {
 						notFound.add(inf.pos.getNextPos(d));
 						score += 5000;
-						
+
 					} else if (b.getType().equals(Constants.BLOCK_TYPE_NORMAL)) {
 						score += 5;
 					} else if (!b.getType().equals(
@@ -142,11 +176,12 @@ public class AI {
 										.getNextPos(d).x
 								&& lastPos.get(c.getId()).y == inf.pos
 										.getNextPos(d).y) {
-							score -= 1000;
+							score -= 4000;
+							System.out.println("roo xodesh");
 						}
-						
+
 						boolean skip = false;
-						
+
 						for (Cell c1 : world.getMyCells()) {
 							if (c1.getPos().x == inf.pos.getNextPos(d).x
 									&& c1.getPos().y == inf.pos.getNextPos(d).y) {
@@ -157,13 +192,17 @@ public class AI {
 						if (skip)
 							continue;
 					}
-					
+
 					// visited
-					if(cell_visited.get(c).contains(inf.pos.getNextPos(d))) {
+
+					if (isVisitedBy(c.getId(), inf.pos.getNextPos(d).x,
+							inf.pos.getNextPos(d).y) == 1) {
 						score -= 100;
-					}
-					else { 
-						//System.out.println("YES");
+					} else if (isVisitedBy(c.getId(), inf.pos.getNextPos(d).x,
+							inf.pos.getNextPos(d).y) == 2) {
+						score -= 40;
+					} else {
+						// System.out.println("YES");
 						score += 10000;
 					}
 
@@ -200,18 +239,19 @@ public class AI {
 				}
 			}
 
-			//System.out.println(max_score);
+			// System.out.println(max_score);
 			// move
 			lastPos.put(c.getId(), c.getPos());
-			cell_visited.get(c).add(c.getPos().getNextPos(last_direction));
+			addVisited(c.getId(), c.getPos().getNextPos(last_direction).x, c.getPos().getNextPos(last_direction).y);
 			try {
-				Block b = world.getMap().at(c.getPos().getNextPos(last_direction));
+				Block b = world.getMap().at(
+						c.getPos().getNextPos(last_direction));
 				c.move(last_direction);
-				System.out.println("ID : " + c.getId() + " DIR : " + last_direction);
+				System.out.println("ID : " + c.getId() + " DIR : "
+						+ last_direction);
 			} catch (Exception e) {
 				System.out.println("eeeeeeeeeeeeeeeeeeeeee");
 			}
-			
 
 		}
 	}
