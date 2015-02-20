@@ -136,11 +136,11 @@ public class AI {
 			
 
 			// BFS part
-			Vector<Position> vis = new Vector<Position>();
+			//Vector<Position> vis = new Vector<Position>();
 			Queue<info> Q = new LinkedList<info>();
 			Q.add(new info(null, 0, c.getPos()));
-			if (!visited(c.getPos(), vis))
-				vis.add(c.getPos());
+		//	if (!visited(c.getPos(), vis))
+		//		vis.add(c.getPos());
 			int lvl = 1;
 
 			while (!Q.isEmpty()) {
@@ -174,8 +174,8 @@ public class AI {
 						continue; // goto next direction
 
 					if (b.getType().equals(Constants.BLOCK_TYPE_MITOSIS)&& !inf.mitosis) {
-						if (!visited(inf.pos.getNextPos(d), MitosisBlocks))
-							MitosisBlocks.add(inf.pos.getNextPos(d));
+					//	if (!visited(inf.pos.getNextPos(d), MitosisBlocks))
+					//		MitosisBlocks.add(inf.pos.getNextPos(d));
 
 						if (c.getEnergy() >= Constants.CELL_MIN_ENERGY_FOR_MITOSIS
 								&& lvl == 1) {
@@ -190,8 +190,8 @@ public class AI {
 
 					} else if (b.getType()
 							.equals(Constants.BLOCK_TYPE_RESOURCE)) {
-						if (!visited(inf.pos.getNextPos(d), ResourceBlocks))
-							ResourceBlocks.add(inf.pos.getNextPos(d));
+					//	if (!visited(inf.pos.getNextPos(d), ResourceBlocks))
+					//		ResourceBlocks.add(inf.pos.getNextPos(d));
 
 						if (c.getEnergy() < Constants.CELL_MIN_ENERGY_FOR_MITOSIS
 								&& b.getResource() > 0 && lvl == 1) {
@@ -201,12 +201,12 @@ public class AI {
 							//return ;
 						} else if (c.getEnergy() < Constants.CELL_MIN_ENERGY_FOR_MITOSIS
 								&& b.getResource() > 0) {
-							score += 800;
+							score += 8000;
 						}
 
 					} else if (b.getType().equals(Constants.BLOCK_TYPE_NONE)) {
 						notFound.add(inf.pos.getNextPos(d));
-						score += 5000;
+						score += 500;
 
 					} else if (b.getType().equals(Constants.BLOCK_TYPE_NORMAL)) {
 						score += 5;
@@ -261,10 +261,7 @@ public class AI {
 						score -= 100 * myvisite;
 					} else if (myvisite == -1) {
 						score -= 40;
-					} else {
-						// System.out.println("YES");
-						score += 10000;
-					}
+					} 
 
 					// push
 					info i = new info();
@@ -291,11 +288,11 @@ public class AI {
 			while (!Q.isEmpty()) {
 				info i = Q.poll();
 
-				if (visited(c.getPos().getNextPos(i.d), vis)) {
+	//			if (visited(c.getPos().getNextPos(i.d), vis)) {
 					// System.out.println("ID : " + c.getId() + " POS : " +
 					// c.getPos().x + " " + c.getPos().y);
-					continue; // ignore move X((((
-				}
+	//				continue; // ignore move X((((
+	//			}
 
 				if (i.score > max_score) {
 					max_score = i.score;
@@ -308,7 +305,7 @@ public class AI {
 			lastPos.put(c.getId(), c.getPos());
 			addVisited(c.getId(), c.getPos().getNextPos(last_direction).x, c
 					.getPos().getNextPos(last_direction).y);
-			vis.add(c.getPos());
+	//		vis.add(c.getPos());
 			try {
 				Block b = world.getMap().at(
 						c.getPos().getNextPos(last_direction));
