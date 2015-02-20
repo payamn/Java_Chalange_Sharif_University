@@ -142,11 +142,13 @@ public class AI {
 
 						if (c.getEnergy() >= Constants.CELL_MIN_ENERGY_FOR_MITOSIS
 								&& lvl == 1) {
-							score += 120000;
+							score += Integer.MAX_VALUE - 10000;
+							//c.move(d);
+							//return ;
 						}
 
 						else if (c.getEnergy() >= Constants.CELL_MIN_ENERGY_FOR_MITOSIS) {
-							score += 1200;
+							score += 120000;
 						}
 
 					} else if (b.getType()
@@ -156,7 +158,10 @@ public class AI {
 
 						if (c.getEnergy() < Constants.CELL_MIN_ENERGY_FOR_MITOSIS
 								&& b.getResource() > 0 && lvl == 1) {
-							score += 9000;
+							// score += 9000;
+							score += Integer.MAX_VALUE - 10000;
+							//c.move(d);
+							//return ;
 						} else if (c.getEnergy() < Constants.CELL_MIN_ENERGY_FOR_MITOSIS
 								&& b.getResource() > 0) {
 							score += 200;
