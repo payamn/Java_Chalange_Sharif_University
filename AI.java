@@ -16,6 +16,7 @@ import java.util.Vector;
 
 import javax.swing.plaf.basic.BasicInternalFrameTitlePane.MaximizeAction;
 
+import com.sun.corba.se.impl.orbutil.closure.Constant;
 import com.sun.org.apache.bcel.internal.generic.NEW;
 
 /**
@@ -31,6 +32,7 @@ public class AI {
 	private static Vector<Position> ResourceBlocks = new Vector<Position>();
 	private static Vector<Position> notFound = new Vector<Position>();
 	private static HashMap<String, Position> lastPos = new HashMap<String, Position>();
+
 	// private static HashMap<Cell, Vector<Position>> cell_visited = new
 	// HashMap<Cell, Vector<Position>>();
 	private static HashMap<Integer, HashMap<Integer, HashMap<String, Integer>>> visitedMap = new HashMap<Integer, HashMap<Integer, HashMap<String, Integer>>>();
@@ -72,7 +74,7 @@ public class AI {
 			HashMap<Integer, HashMap<String, Integer>> a = new HashMap<Integer, HashMap<String, Integer>>();
 			HashMap<String, Integer> a1 = new HashMap<String, Integer>();
 			a1.put(id, 1);
-			a.put(x, a1);
+			a.put(y, a1);
 			visitedMap.put(x, a);
 		}
 	}
@@ -93,10 +95,15 @@ public class AI {
 			} else if (world.getMap().at(c.getPos()).getType()
 					.equals(Constants.BLOCK_TYPE_RESOURCE)
 					&& c.getEnergy() < Constants.CELL_MIN_ENERGY_FOR_MITOSIS
-					&& world.getMap().at(c.getPos()).getResource() != 0) {
+					&& world.getMap().at(c.getPos()).getResource() >=0) {
 				c.gainResource();
 				continue;
 			}
+			else if (world.getMap().at(c.getPos()).getType().equals(Constants.BLOCK_TYPE_RESOURCE)&& isVisitedBy(c.getId(), c.getPos().x, c.getPos().y)>=0&& world.getMap().at(c.getPos()).getResource() >0 && c.getEnergy() < Constants.CELL_MAX_ENERGY) {
+				c.gainResource();
+				continue;
+			}
+			
 
 			// BFS part
 			Vector<Position> vis = new Vector<Position>();
@@ -136,19 +143,19 @@ public class AI {
 					if (b.getType().equals(Constants.BLOCK_TYPE_IMPASSABLE))
 						continue; // goto next direction
 
-					if (b.getType().equals(Constants.BLOCK_TYPE_MITOSIS)) {
+					if (b.getType().equals(Constants.BLOCK_TYPE_MITOSIS)&& !inf.mitosis) {
 						if (!visited(inf.pos.getNextPos(d), MitosisBlocks))
 							MitosisBlocks.add(inf.pos.getNextPos(d));
 
 						if (c.getEnergy() >= Constants.CELL_MIN_ENERGY_FOR_MITOSIS
 								&& lvl == 1) {
-							score += Integer.MAX_VALUE - 10000;
+							score += 10000;
 							//c.move(d);
 							//return ;
 						}
 
 						else if (c.getEnergy() >= Constants.CELL_MIN_ENERGY_FOR_MITOSIS) {
-							score += 120000;
+							score += 8000;
 						}
 
 					} else if (b.getType()
@@ -159,12 +166,12 @@ public class AI {
 						if (c.getEnergy() < Constants.CELL_MIN_ENERGY_FOR_MITOSIS
 								&& b.getResource() > 0 && lvl == 1) {
 							// score += 9000;
-							score += Integer.MAX_VALUE - 10000;
+							score += 10000;
 							//c.move(d);
 							//return ;
 						} else if (c.getEnergy() < Constants.CELL_MIN_ENERGY_FOR_MITOSIS
 								&& b.getResource() > 0) {
-							score += 200;
+							score += 800;
 						}
 
 					} else if (b.getType().equals(Constants.BLOCK_TYPE_NONE)) {
@@ -188,7 +195,7 @@ public class AI {
 						// if (world.getMyCells().size() == 1) {
 						// score -= 5000000; // never go there!
 						// } else {
-						score -= 5000;
+						score -= 1200000;
 						// }
 					}
 					if (lvl == 1) {
@@ -332,11 +339,12 @@ class info {
 	public int score;
 	public Position pos;
 	public short path_size;
-
+	public boolean mitosis;
 	public info(Direction d, int score, Position p) {
 		this.d = d;
 		this.score = score;
 		pos = p;
+		mitosis = false;
 	}
 
 	public info() {
