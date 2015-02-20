@@ -18,6 +18,7 @@ import javax.swing.plaf.basic.BasicInternalFrameTitlePane.MaximizeAction;
 
 import com.sun.corba.se.impl.orbutil.closure.Constant;
 import com.sun.org.apache.bcel.internal.generic.NEW;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 
 /**
  * AI class. You should fill body of the method {@link #doTurn}. Do not change
@@ -32,7 +33,7 @@ public class AI {
 	private static Vector<Position> ResourceBlocks = new Vector<Position>();
 	private static Vector<Position> notFound = new Vector<Position>();
 	private static HashMap<String, Position> lastPos = new HashMap<String, Position>();
-
+	private static HashMap<String, HashMap<String,Boolean>> isConnected =  new HashMap<String, HashMap<String,Boolean>>();
 	// private static HashMap<Cell, Vector<Position>> cell_visited = new
 	// HashMap<Cell, Vector<Position>>();
 	private static HashMap<Integer, HashMap<Integer, HashMap<String, Integer>>> visitedMap = new HashMap<Integer, HashMap<Integer, HashMap<String, Integer>>>();
@@ -56,6 +57,27 @@ public class AI {
 		return 0;
 	}
 
+	private Boolean connected(String id, int x ,int y){
+		//System.out.println("-0-0-0-0-0- in conected");
+		if (visitedMap.containsKey(x)) {
+			HashMap<Integer, HashMap<String, Integer>> a = visitedMap.get(x);
+			if (a.containsKey(y)) {
+				HashMap<String, Integer> a1 = a.get(y);
+				for (String bb : a1.keySet()){
+					if(isConnected.containsKey(bb)){
+						 HashMap<String, Boolean> ss = isConnected.get(bb);
+						 System.out.println(bb + "found one");
+						 if (ss.containsKey(id))
+							 return true;
+						 
+					}
+				}
+			}
+		}
+		
+		return false;
+	}
+	
 	private void addVisited(String id, int x, int y) {
 		if (visitedMap.containsKey(x)) {
 			HashMap<Integer, HashMap<String, Integer>> a = visitedMap.get(x);
@@ -63,8 +85,17 @@ public class AI {
 				HashMap<String, Integer> a1 = a.get(y);
 				if (a1.containsKey(id)) {
 					a1.put(id, a1.get(id) + 1);
-				} else
+				} else{
+					for (String komaki : a1.keySet()){
+						HashMap<String, Boolean> added1 = new HashMap<String, Boolean>();
+						added1.put(komaki, true);
+						HashMap<String, Boolean> added2 = new HashMap<String, Boolean>();
+						added2.put(id, true);
+						isConnected.put(komaki,added2);
+						isConnected.put(id,added1);
+					}
 					a1.put(id, 1);
+				}
 			} else {
 				HashMap<String, Integer> a1 = new HashMap<String, Integer>();
 				a1.put(id, 1);
@@ -87,15 +118,14 @@ public class AI {
 
 		for (Cell c : world.getMyCells()) {
 			// System.out.println(c.getId());
-			if (world.getMap().at(c.getPos()).getType()
-					.equals(Constants.BLOCK_TYPE_MITOSIS)
+			if (world.getMap().at(c.getPos()).getType().equals(Constants.BLOCK_TYPE_MITOSIS)
 					&& c.getEnergy() >= Constants.CELL_MIN_ENERGY_FOR_MITOSIS) {
 				c.mitosis();
 				continue;
 			} else if (world.getMap().at(c.getPos()).getType()
 					.equals(Constants.BLOCK_TYPE_RESOURCE)
 					&& c.getEnergy() < Constants.CELL_MIN_ENERGY_FOR_MITOSIS
-					&& world.getMap().at(c.getPos()).getResource() >=0) {
+					&& world.getMap().at(c.getPos()).getResource() >0) {
 				c.gainResource();
 				continue;
 			}
@@ -128,7 +158,7 @@ public class AI {
 				for (Direction d : Direction.values()) {
 					int score = inf.score;
 
-					if (!isPossible(c, d, world))
+					if (!isPossible(c, d, world))	
 						continue;
 
 					// get block
@@ -190,7 +220,7 @@ public class AI {
 					// check for height
 					if (!b.getType().equals(Constants.BLOCK_TYPE_IMPASSABLE)
 							&& b.getHeight()
-									- world.getMap().at(inf.pos).getHeight() < -2) {
+									- world.getMap().at(inf.pos).getHeight() < -2 && connected(c.getId(), world.getMap().at(inf.pos).getPos().x, world.getMap().at(inf.pos).getPos().y)==false) {
 
 						// if (world.getMyCells().size() == 1) {
 						// score -= 5000000; // never go there!
@@ -224,12 +254,12 @@ public class AI {
 					}
 
 					// visited
-					int visited = isVisitedBy(c.getId(),
+					int myvisite = isVisitedBy(c.getId(),
 							inf.pos.getNextPos(d).x, inf.pos.getNextPos(d).y);
-					if (visited > 0) {
+					if (myvisite > 0) {
 						// System.out.println(visited);
-						score -= 100 * visited;
-					} else if (visited == -1) {
+						score -= 100 * myvisite;
+					} else if (myvisite == -1) {
 						score -= 40;
 					} else {
 						// System.out.println("YES");
