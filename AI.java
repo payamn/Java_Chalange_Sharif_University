@@ -27,7 +27,8 @@ import com.sun.org.apache.xpath.internal.operations.Bool;
  * state of the game.
  */
 public class AI {
-
+	
+	private static boolean avoidChale = true;
 	private static final int MAX_LEVEL = 5;
 	private static Vector<Position> MitosisBlocks = new Vector<Position>();
 	private static Vector<Position> ResourceBlocks = new Vector<Position>();
@@ -48,7 +49,7 @@ public class AI {
 			if (a.containsKey(y)) {
 				HashMap<String, Integer> a1 = a.get(y);
 				if (a1.containsKey(id)) {
-					System.out.println("adad"+ a1.get(id));
+					
 					return a1.get(id);
 				} else {
 					return -1;
@@ -72,6 +73,8 @@ public class AI {
 							return true;
 
 					}
+//					else if (bb.equals(id))
+//						return true;
 				}
 			}
 		}
@@ -85,6 +88,8 @@ public class AI {
 			if (a.containsKey(y)) {
 				HashMap<String, Integer> a1 = a.get(y);
 				if (a1.containsKey(id)) {
+					if (a1.get(id)==9)
+						avoidChale = false;
 					a1.put(id, a1.get(id) + 1);
 				} else {
 					for (String komaki : a1.keySet()) {
@@ -112,7 +117,10 @@ public class AI {
 	}
 
 	public void doTurn(World world) {
-
+		//System.out.println(world.getTurn());
+		if (world.getTurn()>=300){
+			avoidChale = false;
+		}
 		for (Cell c : world.getMyCells()) {
 			addVisited(c.getId(), c.getPos().x, c.getPos().y);
 		}
@@ -206,11 +214,15 @@ public class AI {
 						if (c.getEnergy() < Constants.CELL_MIN_ENERGY_FOR_MITOSIS
 								&& b.getResource() > 0 && lvl == 1) {
 							// score += 9000;
+							if (world.getTurn()>340)
+								score += 500000;
 							score += 10000;
 							// c.move(d);
 							// return ;
 						} else if (c.getEnergy() < Constants.CELL_MIN_ENERGY_FOR_MITOSIS
 								&& b.getResource() > 0) {
+							if (world.getTurn()>340)
+								score += 400000;
 							score += 8000;
 						}
 
@@ -238,6 +250,7 @@ public class AI {
 						// if (world.getMyCells().size() == 1) {
 						// score -= 5000000; // never go there!
 						// } else {
+						inf.inChale = true;
 						score -= 1200000;
 						// }
 					}
@@ -279,6 +292,7 @@ public class AI {
 					// push
 					info i = new info();
 					i.lvl = lvl+1;
+					i.inChale = inf.inChale;
 					if (lvl == 1) {
 						i.father = inf;
 						i.d = d;
@@ -319,11 +333,20 @@ public class AI {
 				// c.getPos().x + " " + c.getPos().y);
 				// continue; // ignore move X((((
 				// }
-
-				if (i.score > max_score) {
+				if (avoidChale==true){
+					
+					if (i.score > max_score && !i.inChale) {
+						max_score = i.score;
+						last_direction = i.d;
+					}
+					else 
+						System.out.println(i.inChale);
+				}
+				else if (i.score > max_score){
 					max_score = i.score;
 					last_direction = i.d;
 				}
+				
 			}
 
 			// System.out.println(max_score);
@@ -336,8 +359,8 @@ public class AI {
 				Block b = world.getMap().at(
 						c.getPos().getNextPos(last_direction));
 				c.move(last_direction);
-				System.out.println("ID : " + c.getId() + " DIR : "
-						+ last_direction);
+				//System.out.println("ID : " + c.getId() + " DIR : "
+				//		+ last_direction);
 			} catch (Exception e) {
 				System.out.println("eeeeeeeeeeeeeeeeeeeeee");
 			}
@@ -388,6 +411,7 @@ public class AI {
 }
 
 class info {
+	public boolean inChale;
 	public info father;
 	public Direction d;
 	public int score;
@@ -402,6 +426,7 @@ class info {
 		mitosis = false;
 		lvl = level;
 		father = null;
+		inChale = false;
 	}
 
 	public info() {
