@@ -37,7 +37,7 @@ public class AI {
 	Random rnd = new Random();
 
 	private int isVisitedBy(String id, int x, int y) { // 2 means found but not
-													// with this id, 1 means
+														// with this id, 1 means
 														// found and this cell
 														// visit it before
 		if (visitedMap.containsKey(x)) {
@@ -66,7 +66,7 @@ public class AI {
 			} else {
 				HashMap<String, Integer> a1 = new HashMap<String, Integer>();
 				a1.put(id, 1);
-				a.put(y,a1);
+				a.put(y, a1);
 			}
 		} else {
 			HashMap<Integer, HashMap<String, Integer>> a = new HashMap<Integer, HashMap<String, Integer>>();
@@ -102,7 +102,8 @@ public class AI {
 			Vector<Position> vis = new Vector<Position>();
 			Queue<info> Q = new LinkedList<info>();
 			Q.add(new info(null, 0, c.getPos()));
-			vis.add(c.getPos());
+			if (!visited(c.getPos(), vis))
+				vis.add(c.getPos());
 			int lvl = 1;
 
 			while (!Q.isEmpty()) {
@@ -119,7 +120,10 @@ public class AI {
 
 				for (Direction d : Direction.values()) {
 					int score = inf.score;
-					
+
+					if (!isPossible(c, d, world))
+						continue;
+
 					// get block
 					Block b = null;
 					try {
@@ -133,11 +137,12 @@ public class AI {
 						continue; // goto next direction
 
 					if (b.getType().equals(Constants.BLOCK_TYPE_MITOSIS)) {
-						MitosisBlocks.add(inf.pos.getNextPos(d));
+						if (!visited(inf.pos.getNextPos(d), MitosisBlocks))
+							MitosisBlocks.add(inf.pos.getNextPos(d));
 
 						if (c.getEnergy() >= Constants.CELL_MIN_ENERGY_FOR_MITOSIS
 								&& lvl == 1) {
-							score += 12000;
+							score += 120000;
 						}
 
 						else if (c.getEnergy() >= Constants.CELL_MIN_ENERGY_FOR_MITOSIS) {
@@ -146,15 +151,17 @@ public class AI {
 
 					} else if (b.getType()
 							.equals(Constants.BLOCK_TYPE_RESOURCE)) {
-						ResourceBlocks.add(inf.pos.getNextPos(d));
+						if (!visited(inf.pos.getNextPos(d), ResourceBlocks))
+							ResourceBlocks.add(inf.pos.getNextPos(d));
 
 						if (c.getEnergy() < Constants.CELL_MIN_ENERGY_FOR_MITOSIS
 								&& b.getResource() > 0 && lvl == 1) {
-							score += 900;
+							score += 9000;
 						} else if (c.getEnergy() < Constants.CELL_MIN_ENERGY_FOR_MITOSIS
 								&& b.getResource() > 0) {
-							score += 90;
+							score += 200;
 						}
+
 					} else if (b.getType().equals(Constants.BLOCK_TYPE_NONE)) {
 						notFound.add(inf.pos.getNextPos(d));
 						score += 5000;
@@ -166,27 +173,31 @@ public class AI {
 							&& b.getHeight()
 									- world.getMap().at(inf.pos).getHeight() > 2) {
 						continue;
-					} else if (!b.getType().equals(
-							Constants.BLOCK_TYPE_IMPASSABLE)
+					}
+
+					// check for height
+					if (!b.getType().equals(Constants.BLOCK_TYPE_IMPASSABLE)
 							&& b.getHeight()
 									- world.getMap().at(inf.pos).getHeight() < -2) {
 
-						if (world.getMyCells().size() == 1) {
-							score -= 5000000;
-						} else {
-							score -= 50;
-						}
+						// if (world.getMyCells().size() == 1) {
+						// score -= 5000000; // never go there!
+						// } else {
+						score -= 5000;
+						// }
 					}
 					if (lvl == 1) {
-						if (lastPos.get(c.getId()) != null
-								&& lastPos.get(c.getId()).x == inf.pos
-										.getNextPos(d).x
-								&& lastPos.get(c.getId()).y == inf.pos
-										.getNextPos(d).y) {
-							//score -= 4000;
-							//System.out.println("roo xodesh");
-						}
-
+						if (isDanger(c.getPos().getNextPos(d), world)) // ignore
+																		// the
+																		// move
+							continue;
+						/*
+						 * if (lastPos.get(c.getId()) != null &&
+						 * lastPos.get(c.getId()).x == inf.pos .getNextPos(d).x
+						 * && lastPos.get(c.getId()).y == inf.pos
+						 * .getNextPos(d).y) { score -= 4000;
+						 * //System.out.println("roo xodesh"); }
+						 */
 						boolean skip = false;
 
 						for (Cell c1 : world.getMyCells()) {
@@ -201,15 +212,15 @@ public class AI {
 					}
 
 					// visited
-					int visited = isVisitedBy(c.getId(), inf.pos.getNextPos(d).x,
-							inf.pos.getNextPos(d).y);
-					if ( visited>0) {
-						System.out.println(visited);
-						score -= 100*visited;
+					int visited = isVisitedBy(c.getId(),
+							inf.pos.getNextPos(d).x, inf.pos.getNextPos(d).y);
+					if (visited > 0) {
+						// System.out.println(visited);
+						score -= 100 * visited;
 					} else if (visited == -1) {
 						score -= 40;
 					} else {
-						//System.out.println("YES");
+						// System.out.println("YES");
 						score += 10000;
 					}
 
@@ -235,12 +246,13 @@ public class AI {
 
 			Direction last_direction = Direction.values()[rnd.nextInt(6)];
 
-			while (!Q.isEmpty()) {		
+			while (!Q.isEmpty()) {
 				info i = Q.poll();
-				
-				if(visited(c.getPos().getNextPos(i.d), vis)) {
-					System.out.println("ID : " + c.getId() + " POS : " + c.getPos().x + " " + c.getPos().y);
-					continue;	// ignore move X((((
+
+				if (visited(c.getPos().getNextPos(i.d), vis)) {
+					// System.out.println("ID : " + c.getId() + " POS : " +
+					// c.getPos().x + " " + c.getPos().y);
+					continue; // ignore move X((((
 				}
 
 				if (i.score > max_score) {
@@ -252,14 +264,15 @@ public class AI {
 			// System.out.println(max_score);
 			// move
 			lastPos.put(c.getId(), c.getPos());
-			addVisited(c.getId(), c.getPos().getNextPos(last_direction).x, c.getPos().getNextPos(last_direction).y);
+			addVisited(c.getId(), c.getPos().getNextPos(last_direction).x, c
+					.getPos().getNextPos(last_direction).y);
 			vis.add(c.getPos());
 			try {
 				Block b = world.getMap().at(
 						c.getPos().getNextPos(last_direction));
 				c.move(last_direction);
-				//System.out.println("ID : " + c.getId() + " DIR : "
-					//	+ last_direction);
+				System.out.println("ID : " + c.getId() + " DIR : "
+						+ last_direction);
 			} catch (Exception e) {
 				System.out.println("eeeeeeeeeeeeeeeeeeeeee");
 			}
@@ -276,6 +289,37 @@ public class AI {
 		return false;
 	}
 
+	public static boolean isDanger(Position p, World w) {
+		// max height!
+		int count = 0;
+		
+		for (Direction d : Direction.values()) {
+			Position pos = p.getNextPos(d);
+			try {
+				if (w.getMap().at(pos).getHeight()
+						- w.getMap().at(p).getHeight() > 2) {
+					++ count;
+				}
+			} catch (Exception e) {
+
+			}
+		}
+		if(count < 5)
+			return false;
+		return true;
+	}
+
+	public static boolean isPossible(Cell c, Direction d, World w) {
+		// is it possible to go there? :|
+		try {
+			if (w.getMap().at(c.getPos().getNextPos(d)).getHeight()
+					- w.getMap().at(c.getPos()).getHeight() > 2)
+				return false;
+		} catch (Exception e) {
+
+		}
+		return true;
+	}
 }
 
 class info {
