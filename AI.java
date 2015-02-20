@@ -33,7 +33,7 @@ public class AI {
 	private static Vector<Position> ResourceBlocks = new Vector<Position>();
 	private static Vector<Position> notFound = new Vector<Position>();
 	private static HashMap<String, Position> lastPos = new HashMap<String, Position>();
-	private static HashMap<String, HashMap<String, Boolean>> isConnected = new HashMap<String, HashMap<String, Boolean>>();
+	private static HashMap<String, HashMap<String,Boolean>> isConnected =  new HashMap<String, HashMap<String,Boolean>>();
 	// private static HashMap<Cell, Vector<Position>> cell_visited = new
 	// HashMap<Cell, Vector<Position>>();
 	private static HashMap<Integer, HashMap<Integer, HashMap<String, Integer>>> visitedMap = new HashMap<Integer, HashMap<Integer, HashMap<String, Integer>>>();
@@ -57,27 +57,27 @@ public class AI {
 		return 0;
 	}
 
-	private Boolean connected(String id, int x, int y) {
-		// System.out.println("-0-0-0-0-0- in conected");
+	private Boolean connected(String id, int x ,int y){
+		//System.out.println("-0-0-0-0-0- in conected");
 		if (visitedMap.containsKey(x)) {
 			HashMap<Integer, HashMap<String, Integer>> a = visitedMap.get(x);
 			if (a.containsKey(y)) {
 				HashMap<String, Integer> a1 = a.get(y);
-				for (String bb : a1.keySet()) {
-					if (isConnected.containsKey(bb)) {
-						HashMap<String, Boolean> ss = isConnected.get(bb);
-						System.out.println(bb + "found one");
-						if (ss.containsKey(id))
-							return true;
-
+				for (String bb : a1.keySet()){
+					if(isConnected.containsKey(bb)){
+						 HashMap<String, Boolean> ss = isConnected.get(bb);
+						 System.out.println(bb + "found one");
+						 if (ss.containsKey(id))
+							 return true;
+						 
 					}
 				}
 			}
 		}
-
+		
 		return false;
 	}
-
+	
 	private void addVisited(String id, int x, int y) {
 		if (visitedMap.containsKey(x)) {
 			HashMap<Integer, HashMap<String, Integer>> a = visitedMap.get(x);
@@ -85,14 +85,14 @@ public class AI {
 				HashMap<String, Integer> a1 = a.get(y);
 				if (a1.containsKey(id)) {
 					a1.put(id, a1.get(id) + 1);
-				} else {
-					for (String komaki : a1.keySet()) {
+				} else{
+					for (String komaki : a1.keySet()){
 						HashMap<String, Boolean> added1 = new HashMap<String, Boolean>();
 						added1.put(komaki, true);
 						HashMap<String, Boolean> added2 = new HashMap<String, Boolean>();
 						added2.put(id, true);
-						isConnected.put(komaki, added2);
-						isConnected.put(id, added1);
+						isConnected.put(komaki,added2);
+						isConnected.put(id,added1);
 					}
 					a1.put(id, 1);
 				}
@@ -118,32 +118,29 @@ public class AI {
 
 		for (Cell c : world.getMyCells()) {
 			// System.out.println(c.getId());
-			if (world.getMap().at(c.getPos()).getType()
-					.equals(Constants.BLOCK_TYPE_MITOSIS)
+			if (world.getMap().at(c.getPos()).getType().equals(Constants.BLOCK_TYPE_MITOSIS)
 					&& c.getEnergy() >= Constants.CELL_MIN_ENERGY_FOR_MITOSIS) {
 				c.mitosis();
 				continue;
 			} else if (world.getMap().at(c.getPos()).getType()
 					.equals(Constants.BLOCK_TYPE_RESOURCE)
 					&& c.getEnergy() < Constants.CELL_MIN_ENERGY_FOR_MITOSIS
-					&& world.getMap().at(c.getPos()).getResource() > 0) {
-				c.gainResource();
-				continue;
-			} else if (world.getMap().at(c.getPos()).getType()
-					.equals(Constants.BLOCK_TYPE_RESOURCE)
-					&& isVisitedBy(c.getId(), c.getPos().x, c.getPos().y) >= 0
-					&& world.getMap().at(c.getPos()).getResource() > 0
-					&& c.getEnergy() < Constants.CELL_MAX_ENERGY) {
+					&& world.getMap().at(c.getPos()).getResource() >0) {
 				c.gainResource();
 				continue;
 			}
+			else if (world.getMap().at(c.getPos()).getType().equals(Constants.BLOCK_TYPE_RESOURCE)&& isVisitedBy(c.getId(), c.getPos().x, c.getPos().y)>=0&& world.getMap().at(c.getPos()).getResource() >0 && c.getEnergy() < Constants.CELL_MAX_ENERGY) {
+				c.gainResource();
+				continue;
+			}
+			
 
 			// BFS part
 			Vector<Position> vis = new Vector<Position>();
 			Queue<info> Q = new LinkedList<info>();
 			Q.add(new info(null, 0, c.getPos()));
-			
-			vis.add(c.getPos());
+			if (!visited(c.getPos(), vis))
+				vis.add(c.getPos());
 			int lvl = 1;
 
 			while (!Q.isEmpty()) {
@@ -161,7 +158,7 @@ public class AI {
 				for (Direction d : Direction.values()) {
 					int score = inf.score;
 
-					if (!isPossible(c, d, world))
+					if (!isPossible(c, d, world))	
 						continue;
 
 					// get block
@@ -176,16 +173,15 @@ public class AI {
 					if (b.getType().equals(Constants.BLOCK_TYPE_IMPASSABLE))
 						continue; // goto next direction
 
-					if (b.getType().equals(Constants.BLOCK_TYPE_MITOSIS)
-							&& !inf.mitosis) {
+					if (b.getType().equals(Constants.BLOCK_TYPE_MITOSIS)&& !inf.mitosis) {
 						if (!visited(inf.pos.getNextPos(d), MitosisBlocks))
 							MitosisBlocks.add(inf.pos.getNextPos(d));
 
 						if (c.getEnergy() >= Constants.CELL_MIN_ENERGY_FOR_MITOSIS
 								&& lvl == 1) {
 							score += 10000;
-							// c.move(d);
-							// return ;
+							//c.move(d);
+							//return ;
 						}
 
 						else if (c.getEnergy() >= Constants.CELL_MIN_ENERGY_FOR_MITOSIS) {
@@ -201,8 +197,8 @@ public class AI {
 								&& b.getResource() > 0 && lvl == 1) {
 							// score += 9000;
 							score += 10000;
-							// c.move(d);
-							// return ;
+							//c.move(d);
+							//return ;
 						} else if (c.getEnergy() < Constants.CELL_MIN_ENERGY_FOR_MITOSIS
 								&& b.getResource() > 0) {
 							score += 800;
@@ -224,10 +220,7 @@ public class AI {
 					// check for height
 					if (!b.getType().equals(Constants.BLOCK_TYPE_IMPASSABLE)
 							&& b.getHeight()
-									- world.getMap().at(inf.pos).getHeight() < -2
-							&& connected(c.getId(), world.getMap().at(inf.pos)
-									.getPos().x, world.getMap().at(inf.pos)
-									.getPos().y) == false) {
+									- world.getMap().at(inf.pos).getHeight() < -2 && connected(c.getId(), world.getMap().at(inf.pos).getPos().x, world.getMap().at(inf.pos).getPos().y)==false) {
 
 						// if (world.getMyCells().size() == 1) {
 						// score -= 5000000; // never go there!
@@ -285,10 +278,7 @@ public class AI {
 						i.pos = inf.pos.getNextPos(d);
 					}
 
-					if(!visited(i.pos, vis)) {
-						Q.add(i);
-						vis.add(i.pos);
-					}
+					Q.add(i);
 				}
 
 			}
@@ -301,6 +291,12 @@ public class AI {
 			while (!Q.isEmpty()) {
 				info i = Q.poll();
 
+				if (visited(c.getPos().getNextPos(i.d), vis)) {
+					// System.out.println("ID : " + c.getId() + " POS : " +
+					// c.getPos().x + " " + c.getPos().y);
+					continue; // ignore move X((((
+				}
+
 				if (i.score > max_score) {
 					max_score = i.score;
 					last_direction = i.d;
@@ -312,6 +308,7 @@ public class AI {
 			lastPos.put(c.getId(), c.getPos());
 			addVisited(c.getId(), c.getPos().getNextPos(last_direction).x, c
 					.getPos().getNextPos(last_direction).y);
+			vis.add(c.getPos());
 			try {
 				Block b = world.getMap().at(
 						c.getPos().getNextPos(last_direction));
@@ -334,89 +331,22 @@ public class AI {
 		return false;
 	}
 
-	/*
-	public static int findResource(World w, Cell c) {
-		int minDist = Integer.MAX_VALUE;
-		Position resrc = null;
-
-		for (Position pos : ResourceBlocks) {
-			int dist = (int) Math.sqrt((c.getPos().x - pos.x)
-					* (c.getPos().x - pos.x) + (c.getPos().y - pos.y)
-					* (c.getPos().y - pos.y));
-			if (dist < minDist) {
-				resrc = pos;
-				minDist = dist;
-			}
-		}
-
-		// find safe way if possible
-		Position current_pos = c.getPos();
-
-		while (!(current_pos.x == resrc.x && current_pos.y == resrc.y)) {
-			boolean flag = false;
-			Direction d = null;
-
-			try {
-				if (resrc.x > current_pos.x) {
-					current_pos.x++;
-				} else if (resrc.x < current_pos.x) {
-					current_pos.x--;
-				} else if (resrc.y > current_pos.y) {
-					current_pos.y++;
-				} else if (resrc.y < current_pos.y) {
-					current_pos.y--;
-				}
-
-				// get block for test
-				Block b = w.getMap().at(current_pos);
-				flag = true;
-			} catch (Exception e) {
-				break;
-			}
-
-			if (!flag) {
-				try {
-					if (resrc.y > current_pos.y) {
-						current_pos.y++;
-					} else if (resrc.y < current_pos.y) {
-						current_pos.y--;
-					} else if (resrc.x > current_pos.x) {
-						current_pos.x++;
-					} else if (resrc.x < current_pos.x) {
-						current_pos.x--;
-					}
-
-					// get block for test
-					Block b = w.getMap().at(current_pos);
-					flag = true;
-				} catch (Exception e) {
-					break;
-				}
-
-			}
-
-		}
-
-		return 1;
-		
-	}
-	 */
 	public static boolean isDanger(Position p, World w) {
 		// max height!
 		int count = 0;
-
+		
 		for (Direction d : Direction.values()) {
 			Position pos = p.getNextPos(d);
 			try {
 				if (w.getMap().at(pos).getHeight()
 						- w.getMap().at(p).getHeight() > 2) {
-					++count;
+					++ count;
 				}
 			} catch (Exception e) {
 
 			}
 		}
-		if (count < 5)
+		if(count < 5)
 			return false;
 		return true;
 	}
@@ -440,7 +370,6 @@ class info {
 	public Position pos;
 	public short path_size;
 	public boolean mitosis;
-
 	public info(Direction d, int score, Position p) {
 		this.d = d;
 		this.score = score;
