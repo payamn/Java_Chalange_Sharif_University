@@ -48,6 +48,7 @@ public class AI {
 			if (a.containsKey(y)) {
 				HashMap<String, Integer> a1 = a.get(y);
 				if (a1.containsKey(id)) {
+					System.out.println("adad"+ a1.get(id));
 					return a1.get(id);
 				} else {
 					return -1;
@@ -140,24 +141,25 @@ public class AI {
 
 			// BFS part
 			// Vector<Position> vis = new Vector<Position>();
-			Queue<info> Q = new LinkedList<info>();
-			Q.add(new info(null, 0, c.getPos()));
+
 			// if (!visited(c.getPos(), vis))
 			// vis.add(c.getPos());
 			int lvl = 1;
 			int count = 0;
-			
+			Queue<info> Q = new LinkedList<info>();
+			Q.add(new info(null, 0, c.getPos(),lvl));
+	//		HashMap<Integer, Boolean> visFixed = new HashMap<Integer, Boolean>();
 			while (!Q.isEmpty()) {
-				count ++;
+			//	count ++;
 				if(count >= 2000)
 					break;
 				info inf = Q.poll();
-
+				lvl = inf.lvl;
 				// set level
-				if (Math.abs(inf.pos.x - c.getPos().x) != 0)
-					lvl = Math.abs(inf.pos.x - c.getPos().x) + 1;
-				else if (Math.abs(inf.pos.y - c.getPos().y) != 0)
-					lvl = Math.abs(inf.pos.y - c.getPos().y) + 1;
+//				if (Math.abs(inf.pos.x - c.getPos().x) != 0)
+//					lvl = Math.abs(inf.pos.x - c.getPos().x) + 1;
+//				else if (Math.abs(inf.pos.y - c.getPos().y) != 0)
+//					lvl = Math.abs(inf.pos.y - c.getPos().y) + 1;
 
 				if (lvl == MAX_LEVEL)
 					break;
@@ -213,7 +215,7 @@ public class AI {
 						}
 
 					} else if (b.getType().equals(Constants.BLOCK_TYPE_NONE)) {
-						notFound.add(inf.pos.getNextPos(d));
+						//notFound.add(inf.pos.getNextPos(d));
 						score += 50000;
 
 					} else if (b.getType().equals(Constants.BLOCK_TYPE_NORMAL)) {
@@ -276,7 +278,9 @@ public class AI {
 
 					// push
 					info i = new info();
+					i.lvl = lvl+1;
 					if (lvl == 1) {
+						i.father = inf;
 						i.d = d;
 						i.score = score;
 						i.pos = inf.pos.getNextPos(d);
@@ -285,8 +289,19 @@ public class AI {
 						i.score = score;
 						i.pos = inf.pos.getNextPos(d);
 					}
-
+					info alaki = new info();
+					alaki = i.father;
+					boolean flagContinue= false;
+					while (alaki != null){
+						if(alaki.pos.x == i.pos.x && alaki.pos.y== i.pos.y){
+							flagContinue = true;
+						}
+						alaki = alaki.father;
+					}
+					if (flagContinue)
+						continue;
 					Q.add(i);
+
 				}
 
 			}
@@ -314,8 +329,8 @@ public class AI {
 			// System.out.println(max_score);
 			// move
 			lastPos.put(c.getId(), c.getPos());
-			addVisited(c.getId(), c.getPos().getNextPos(last_direction).x, c
-					.getPos().getNextPos(last_direction).y);
+	//		addVisited(c.getId(), c.getPos().getNextPos(last_direction).x, c
+	//				.getPos().getNextPos(last_direction).y);
 			// vis.add(c.getPos());
 			try {
 				Block b = world.getMap().at(
@@ -373,17 +388,20 @@ public class AI {
 }
 
 class info {
+	public info father;
 	public Direction d;
 	public int score;
 	public Position pos;
 	public short path_size;
 	public boolean mitosis;
-
-	public info(Direction d, int score, Position p) {
+	public int lvl;
+	public info(Direction d, int score, Position p, int level) {
 		this.d = d;
 		this.score = score;
 		pos = p;
 		mitosis = false;
+		lvl = level;
+		father = null;
 	}
 
 	public info() {
