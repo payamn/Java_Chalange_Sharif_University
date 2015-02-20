@@ -145,8 +145,12 @@ public class AI {
 			// if (!visited(c.getPos(), vis))
 			// vis.add(c.getPos());
 			int lvl = 1;
-
+			int count = 0;
+			
 			while (!Q.isEmpty()) {
+				count ++;
+				if(count >= 2000)
+					break;
 				info inf = Q.poll();
 
 				// set level
