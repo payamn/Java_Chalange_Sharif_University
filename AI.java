@@ -28,7 +28,7 @@ import com.sun.xml.internal.fastinfoset.algorithm.BuiltInEncodingAlgorithm.WordL
  * state of the game.
  */
 public class AI {
-	
+
 	private static boolean avoidChale = true;
 	private static final int MAX_LEVEL = 5;
 	private static Vector<Position> MitosisBlocks = new Vector<Position>();
@@ -43,14 +43,14 @@ public class AI {
 
 	private int isVisitedBy(String id, int x, int y) { // 2 means found but not
 														// with this id, 1 means
-	//	System.out.println("x: "+x+" y: "+y);												// found and this cell
-														// visit it before
+		// System.out.println("x: "+x+" y: "+y); // found and this cell
+		// visit it before
 		if (visitedMap.containsKey(x)) {
 			HashMap<Integer, HashMap<String, Integer>> a = visitedMap.get(x);
 			if (a.containsKey(y)) {
 				HashMap<String, Integer> a1 = a.get(y);
 				if (a1.containsKey(id)) {
-					
+
 					return a1.get(id);
 				} else {
 					return -1;
@@ -67,18 +67,18 @@ public class AI {
 			if (a.containsKey(y)) {
 				HashMap<String, Integer> a1 = a.get(y);
 				for (String bb : a1.keySet()) {
-					//System.out.println(bb);
+					// System.out.println(bb);
 					if (isConnected.containsKey(bb)) {
 						HashMap<String, Boolean> ss = isConnected.get(bb);
 						System.out.println(bb + "found one");
 						if (ss.containsKey(id))
 							return true;
 
-					}
-					else if (bb.equals(id)){
-						System.out.println("khodama hastam"+x+y);
-						return true; //???????????????????? chera dorsot kar nemikone :(
-					
+					} else if (bb.equals(id)) {
+						System.out.println("khodama hastam" + x + y);
+						return true; // ???????????????????? chera dorsot kar
+										// nemikone :(
+
 					}
 				}
 			}
@@ -88,15 +88,15 @@ public class AI {
 	}
 
 	private void addVisited(String id, int x, int y) {
-		System.out.println("added x: "+x+" added y: "+y);
+		System.out.println("added x: " + x + " added y: " + y);
 		if (visitedMap.containsKey(x)) {
 			HashMap<Integer, HashMap<String, Integer>> a = visitedMap.get(x);
 			if (a.containsKey(y)) {
 				HashMap<String, Integer> a1 = a.get(y);
 				if (a1.containsKey(id)) {
-					if (a1.get(id)==9)
+					if (a1.get(id) == 9)
 						avoidChale = false;
-					
+
 					a1.put(id, a1.get(id) + 1);
 					a.put(y, a1);
 					visitedMap.put(x, a);
@@ -132,8 +132,8 @@ public class AI {
 	}
 
 	public void doTurn(World world) {
-		//System.out.println(world.getTurn());
-		if (world.getTurn()>=300){
+		// System.out.println(world.getTurn());
+		if (world.getTurn() >= 300) {
 			avoidChale = false;
 		}
 		for (Cell c : world.getMyCells()) {
@@ -147,17 +147,19 @@ public class AI {
 					&& c.getEnergy() >= Constants.CELL_MIN_ENERGY_FOR_MITOSIS) {
 				c.mitosis();
 				continue;
-			}else if (world.getMap().at(c.getPos()).getType()
-					.equals(Constants.BLOCK_TYPE_RESOURCE)&& world.getMap().at(c.getPos()).getResource() > 0){
-			 if (c.getEnergy() < Constants.CELL_MIN_ENERGY_FOR_MITOSIS) {
-				c.gainResource();
-				continue;
-			} else if ( c.getEnergy() < Constants.CELL_MAX_ENERGY) {
-				if (isVisitedBy(c.getId(), c.getPos().x, c.getPos().y) > 0||world.getTurn()>400)
+			} else if (world.getMap().at(c.getPos()).getType()
+					.equals(Constants.BLOCK_TYPE_RESOURCE)
+					&& world.getMap().at(c.getPos()).getResource() > 0) {
+				if (c.getEnergy() < Constants.CELL_MIN_ENERGY_FOR_MITOSIS) {
 					c.gainResource();
 					continue;
-			}
-			
+				} else if (c.getEnergy() < Constants.CELL_MAX_ENERGY) {
+					if (isVisitedBy(c.getId(), c.getPos().x, c.getPos().y) > 0
+							|| world.getTurn() > 400)
+						c.gainResource();
+					continue;
+				}
+
 			}
 
 			// BFS part
@@ -168,19 +170,20 @@ public class AI {
 			int lvl = 1;
 			int count = 0;
 			Queue<info> Q = new LinkedList<info>();
-			Q.add(new info(null, 0, c.getPos(),lvl));
-	//		HashMap<Integer, Boolean> visFixed = new HashMap<Integer, Boolean>();
+			Q.add(new info(null, 0, c.getPos(), lvl));
+			// HashMap<Integer, Boolean> visFixed = new HashMap<Integer,
+			// Boolean>();
 			while (!Q.isEmpty()) {
-			//	count ++;
-				if(count >= 2000)
+				// count ++;
+				if (count >= 2000)
 					break;
 				info inf = Q.poll();
 				lvl = inf.lvl;
 				// set level
-//				if (Math.abs(inf.pos.x - c.getPos().x) != 0)
-//					lvl = Math.abs(inf.pos.x - c.getPos().x) + 1;
-//				else if (Math.abs(inf.pos.y - c.getPos().y) != 0)
-//					lvl = Math.abs(inf.pos.y - c.getPos().y) + 1;
+				// if (Math.abs(inf.pos.x - c.getPos().x) != 0)
+				// lvl = Math.abs(inf.pos.x - c.getPos().x) + 1;
+				// else if (Math.abs(inf.pos.y - c.getPos().y) != 0)
+				// lvl = Math.abs(inf.pos.y - c.getPos().y) + 1;
 
 				if (lvl == MAX_LEVEL)
 					break;
@@ -190,10 +193,11 @@ public class AI {
 
 					info alaki = new info();
 					alaki = inf;
-					boolean flagContinue= false;
-					while (alaki != null){
-						
-						if(alaki.pos.x == inf.pos.getNextPos(d).x && alaki.pos.y== inf.pos.getNextPos(d).y){
+					boolean flagContinue = false;
+					while (alaki != null) {
+
+						if (alaki.pos.x == inf.pos.getNextPos(d).x
+								&& alaki.pos.y == inf.pos.getNextPos(d).y) {
 							flagContinue = true;
 							break;
 						}
@@ -201,8 +205,8 @@ public class AI {
 					}
 					if (flagContinue)
 						continue;
-					
-					System.out.println(inf.pos.getNextPos(d).y+" x: "+inf.pos.getNextPos(d).x);
+
+					// System.out.println(inf.pos.getNextPos(d).y+" x: "+inf.pos.getNextPos(d).x);
 					if (!isPossible(inf.pos, d, world))
 						continue;
 
@@ -242,20 +246,20 @@ public class AI {
 						if (c.getEnergy() < Constants.CELL_MIN_ENERGY_FOR_MITOSIS
 								&& b.getResource() > 0 && lvl == 1) {
 							// score += 9000;
-							if (world.getTurn()>340)
+							if (world.getTurn() > 340)
 								score += 500000;
 							score += 10000;
 							// c.move(d);
 							// return ;
 						} else if (c.getEnergy() < Constants.CELL_MIN_ENERGY_FOR_MITOSIS
 								&& b.getResource() > 0) {
-							if (world.getTurn()>340)
+							if (world.getTurn() > 340)
 								score += 400000;
 							score += 8000;
 						}
 
 					} else if (b.getType().equals(Constants.BLOCK_TYPE_NONE)) {
-						//notFound.add(inf.pos.getNextPos(d));
+						// notFound.add(inf.pos.getNextPos(d));
 						score += 50000;
 
 					} else if (b.getType().equals(Constants.BLOCK_TYPE_NORMAL)) {
@@ -271,8 +275,9 @@ public class AI {
 					if (!b.getType().equals(Constants.BLOCK_TYPE_IMPASSABLE)
 							&& b.getHeight()
 									- world.getMap().at(inf.pos).getHeight() < -2
-							&& connected(c.getId(), inf.pos.getNextPos(d).x, inf.pos.getNextPos(d).y) == false) {
-						
+							&& connected(c.getId(), inf.pos.getNextPos(d).x,
+									inf.pos.getNextPos(d).y) == false) {
+
 						// if (world.getMyCells().size() == 1) {
 						// score -= 5000000; // never go there!
 						// } else {
@@ -280,7 +285,7 @@ public class AI {
 						score -= 1200000;
 						// }
 					}
-					
+
 					if (lvl == 1) {
 						if (isDanger(c.getPos().getNextPos(d), world)) // ignore
 																		// the
@@ -318,7 +323,7 @@ public class AI {
 
 					// push
 					info i = new info();
-					i.lvl = lvl+1;
+					i.lvl = lvl + 1;
 					i.inChale = inf.inChale;
 					i.father = inf;
 					if (lvl == 1) {
@@ -331,9 +336,9 @@ public class AI {
 						i.score = score;
 						i.pos = inf.pos.getNextPos(d);
 					}
-					
+
 					Q.add(i);
-					System.out.println("added: x: "+i.pos.x+" y: "+i.pos.y);
+					// System.out.println("added: x: "+i.pos.x+" y: "+i.pos.y);
 
 				}
 
@@ -352,32 +357,31 @@ public class AI {
 				// c.getPos().x + " " + c.getPos().y);
 				// continue; // ignore move X((((
 				// }
-				if (avoidChale==true){
-					
+				if (avoidChale == true) {
+
 					if (i.score > max_score && !i.inChale) {
 						max_score = i.score;
 						last_direction = i.d;
 					}
-				}
-				else if (i.score > max_score){
+				} else if (i.score > max_score) {
 					max_score = i.score;
 					last_direction = i.d;
 				}
-				
+
 			}
 
 			// System.out.println(max_score);
 			// move
 			lastPos.put(c.getId(), c.getPos());
-	//		addVisited(c.getId(), c.getPos().getNextPos(last_direction).x, c
-	//				.getPos().getNextPos(last_direction).y);
+			// addVisited(c.getId(), c.getPos().getNextPos(last_direction).x, c
+			// .getPos().getNextPos(last_direction).y);
 			// vis.add(c.getPos());
 			try {
 				Block b = world.getMap().at(
 						c.getPos().getNextPos(last_direction));
 				c.move(last_direction);
-				//System.out.println("ID : " + c.getId() + " DIR : "
-				//		+ last_direction);
+				// System.out.println("ID : " + c.getId() + " DIR : "
+				// + last_direction);
 			} catch (Exception e) {
 				System.out.println("eeeeeeeeeeeeeeeeeeeeee");
 			}
@@ -436,6 +440,7 @@ class info {
 	public short path_size;
 	public boolean mitosis;
 	public int lvl;
+
 	public info(Direction d, int score, Position p, int level) {
 		this.d = d;
 		this.score = score;
