@@ -70,12 +70,12 @@ public class AI {
 					// System.out.println(bb);
 					if (isConnected.containsKey(bb)) {
 						HashMap<String, Boolean> ss = isConnected.get(bb);
-						System.out.println(bb + "found one");
+				//		System.out.println(bb + "found one");
 						if (ss.containsKey(id))
 							return true;
 
 					} else if (bb.equals(id)) {
-						System.out.println("khodama hastam" + x + y);
+					//	System.out.println("khodama hastam" + x + y);
 						return true; // ???????????????????? chera dorsot kar
 										// nemikone :(
 
@@ -88,7 +88,7 @@ public class AI {
 	}
 
 	private void addVisited(String id, int x, int y) {
-		System.out.println("added x: " + x + " added y: " + y);
+		//System.out.println("added x: " + x + " added y: " + y);
 		if (visitedMap.containsKey(x)) {
 			HashMap<Integer, HashMap<String, Integer>> a = visitedMap.get(x);
 			if (a.containsKey(y)) {
@@ -126,7 +126,7 @@ public class AI {
 			a1.put(id, 1);
 			a.put(y, a1);
 			visitedMap.put(x, a);
-			System.out.println("mamuli");
+		//	System.out.println("mamuli");
 
 		}
 	}
@@ -330,9 +330,9 @@ public class AI {
 					info i = new info();
 					i.lvl = lvl + 1;
 					i.inChale = inf.inChale;
-					i.father = inf;
+					
 					if (lvl == 1) {
-
+						i.father = inf;
 						i.d = d;
 						i.score = score;
 						i.pos = inf.pos.getNextPos(d);
@@ -388,7 +388,8 @@ public class AI {
 				// System.out.println("ID : " + c.getId() + " DIR : "
 				// + last_direction);
 			} catch (Exception e) {
-				System.out.println("eeeeeeeeeeeeeeeeeeeeee");
+				continue;
+				//System.out.println("eeeeeeeeeeeeeeeeeeeeee");
 			}
 
 		}
