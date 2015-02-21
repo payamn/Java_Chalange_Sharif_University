@@ -320,6 +320,11 @@ public class AI {
 					} else if (myvisite == -1) {
 						score -= 40;
 					}
+					if (myvisite <= 0 && inf.inChale == false) {
+						addVisited(c.getId(), inf.pos.getNextPos(d).x,
+								inf.pos.getNextPos(d).y);
+				
+					}
 
 					// push
 					info i = new info();
