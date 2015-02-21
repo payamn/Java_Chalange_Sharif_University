@@ -19,6 +19,7 @@ import javax.swing.plaf.basic.BasicInternalFrameTitlePane.MaximizeAction;
 import com.sun.corba.se.impl.orbutil.closure.Constant;
 import com.sun.org.apache.bcel.internal.generic.NEW;
 import com.sun.org.apache.xpath.internal.operations.Bool;
+import com.sun.xml.internal.fastinfoset.algorithm.BuiltInEncodingAlgorithm.WordListener;
 
 /**
  * AI class. You should fill body of the method {@link #doTurn}. Do not change
@@ -146,19 +147,17 @@ public class AI {
 					&& c.getEnergy() >= Constants.CELL_MIN_ENERGY_FOR_MITOSIS) {
 				c.mitosis();
 				continue;
-			} else if (world.getMap().at(c.getPos()).getType()
-					.equals(Constants.BLOCK_TYPE_RESOURCE)
-					&& c.getEnergy() < Constants.CELL_MIN_ENERGY_FOR_MITOSIS
-					&& world.getMap().at(c.getPos()).getResource() > 0) {
+			}else if (world.getMap().at(c.getPos()).getType()
+					.equals(Constants.BLOCK_TYPE_RESOURCE)&& world.getMap().at(c.getPos()).getResource() > 0){
+			 if (c.getEnergy() < Constants.CELL_MIN_ENERGY_FOR_MITOSIS) {
 				c.gainResource();
 				continue;
-			} else if (world.getMap().at(c.getPos()).getType()
-					.equals(Constants.BLOCK_TYPE_RESOURCE)
-					&& isVisitedBy(c.getId(), c.getPos().x, c.getPos().y) > 0
-					&& world.getMap().at(c.getPos()).getResource() > 0
-					&& c.getEnergy() < Constants.CELL_MAX_ENERGY) {
-				c.gainResource();
-				continue;
+			} else if ( c.getEnergy() < Constants.CELL_MAX_ENERGY) {
+				if (isVisitedBy(c.getId(), c.getPos().x, c.getPos().y) > 0||world.getTurn()>400)
+					c.gainResource();
+					continue;
+			}
+			
 			}
 
 			// BFS part
@@ -281,14 +280,7 @@ public class AI {
 						score -= 1200000;
 						// }
 					}
-					else if (!b.getType().equals(Constants.BLOCK_TYPE_IMPASSABLE)
-							&& b.getHeight()
-							- world.getMap().at(inf.pos).getHeight() < -2
-					&& connected(c.getId(), world.getMap().at(inf.pos)
-							.getPos().x, world.getMap().at(inf.pos)
-							.getPos().y) == true){
-						System.out.println("khar hast"+world.getMap().at(inf.pos).getPos().x+ world.getMap().at(inf.pos).getPos().y);
-					}
+					
 					if (lvl == 1) {
 						if (isDanger(c.getPos().getNextPos(d), world)) // ignore
 																		// the
