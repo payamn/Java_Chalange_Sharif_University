@@ -42,7 +42,7 @@ public class AI {
 
 	private int isVisitedBy(String id, int x, int y) { // 2 means found but not
 														// with this id, 1 means
-														// found and this cell
+	//	System.out.println("x: "+x+" y: "+y);												// found and this cell
 														// visit it before
 		if (visitedMap.containsKey(x)) {
 			HashMap<Integer, HashMap<String, Integer>> a = visitedMap.get(x);
@@ -66,6 +66,7 @@ public class AI {
 			if (a.containsKey(y)) {
 				HashMap<String, Integer> a1 = a.get(y);
 				for (String bb : a1.keySet()) {
+					//System.out.println(bb);
 					if (isConnected.containsKey(bb)) {
 						HashMap<String, Boolean> ss = isConnected.get(bb);
 						System.out.println(bb + "found one");
@@ -73,8 +74,11 @@ public class AI {
 							return true;
 
 					}
-//					else if (bb.equals(id))
-//						return true;
+					else if (bb.equals(id)){
+						System.out.println("khodama hastam"+x+y);
+						return true; //???????????????????? chera dorsot kar nemikone :(
+					
+					}
 				}
 			}
 		}
@@ -83,6 +87,7 @@ public class AI {
 	}
 
 	private void addVisited(String id, int x, int y) {
+		System.out.println("added x: "+x+" added y: "+y);
 		if (visitedMap.containsKey(x)) {
 			HashMap<Integer, HashMap<String, Integer>> a = visitedMap.get(x);
 			if (a.containsKey(y)) {
@@ -90,7 +95,10 @@ public class AI {
 				if (a1.containsKey(id)) {
 					if (a1.get(id)==9)
 						avoidChale = false;
+					
 					a1.put(id, a1.get(id) + 1);
+					a.put(y, a1);
+					visitedMap.put(x, a);
 				} else {
 					for (String komaki : a1.keySet()) {
 						HashMap<String, Boolean> added1 = new HashMap<String, Boolean>();
@@ -99,13 +107,17 @@ public class AI {
 						added2.put(id, true);
 						isConnected.put(komaki, added2);
 						isConnected.put(id, added1);
+
 					}
 					a1.put(id, 1);
+					a.put(y, a1);
+					visitedMap.put(x, a);
 				}
 			} else {
 				HashMap<String, Integer> a1 = new HashMap<String, Integer>();
 				a1.put(id, 1);
 				a.put(y, a1);
+				visitedMap.put(x, a);
 			}
 		} else {
 			HashMap<Integer, HashMap<String, Integer>> a = new HashMap<Integer, HashMap<String, Integer>>();
@@ -113,6 +125,8 @@ public class AI {
 			a1.put(id, 1);
 			a.put(y, a1);
 			visitedMap.put(x, a);
+			System.out.println("mamuli");
+
 		}
 	}
 
@@ -140,7 +154,7 @@ public class AI {
 				continue;
 			} else if (world.getMap().at(c.getPos()).getType()
 					.equals(Constants.BLOCK_TYPE_RESOURCE)
-					&& isVisitedBy(c.getId(), c.getPos().x, c.getPos().y) >= 0
+					&& isVisitedBy(c.getId(), c.getPos().x, c.getPos().y) > 0
 					&& world.getMap().at(c.getPos()).getResource() > 0
 					&& c.getEnergy() < Constants.CELL_MAX_ENERGY) {
 				c.gainResource();
@@ -175,6 +189,21 @@ public class AI {
 				for (Direction d : Direction.values()) {
 					int score = inf.score;
 
+					info alaki = new info();
+					alaki = inf;
+					boolean flagContinue= false;
+					while (alaki != null){
+						
+						if(alaki.pos.x == inf.pos.getNextPos(d).x && alaki.pos.y== inf.pos.getNextPos(d).y){
+							flagContinue = true;
+							break;
+						}
+						alaki = alaki.father;
+					}
+					if (flagContinue)
+						continue;
+					
+					System.out.println(inf.pos.getNextPos(d).y+" x: "+inf.pos.getNextPos(d).x);
 					if (!isPossible(inf.pos, d, world))
 						continue;
 
@@ -197,13 +226,13 @@ public class AI {
 
 						if (c.getEnergy() >= Constants.CELL_MIN_ENERGY_FOR_MITOSIS
 								&& lvl == 1) {
-							score += 10000;
+							score += 90000;
 							// c.move(d);
 							// return ;
 						}
 
 						else if (c.getEnergy() >= Constants.CELL_MIN_ENERGY_FOR_MITOSIS) {
-							score += 8000;
+							score += 80000;
 						}
 
 					} else if (b.getType()
@@ -243,16 +272,22 @@ public class AI {
 					if (!b.getType().equals(Constants.BLOCK_TYPE_IMPASSABLE)
 							&& b.getHeight()
 									- world.getMap().at(inf.pos).getHeight() < -2
-							&& connected(c.getId(), world.getMap().at(inf.pos)
-									.getPos().x, world.getMap().at(inf.pos)
-									.getPos().y) == false) {
-
+							&& connected(c.getId(), inf.pos.getNextPos(d).x, inf.pos.getNextPos(d).y) == false) {
+						
 						// if (world.getMyCells().size() == 1) {
 						// score -= 5000000; // never go there!
 						// } else {
 						inf.inChale = true;
 						score -= 1200000;
 						// }
+					}
+					else if (!b.getType().equals(Constants.BLOCK_TYPE_IMPASSABLE)
+							&& b.getHeight()
+							- world.getMap().at(inf.pos).getHeight() < -2
+					&& connected(c.getId(), world.getMap().at(inf.pos)
+							.getPos().x, world.getMap().at(inf.pos)
+							.getPos().y) == true){
+						System.out.println("khar hast"+world.getMap().at(inf.pos).getPos().x+ world.getMap().at(inf.pos).getPos().y);
 					}
 					if (lvl == 1) {
 						if (isDanger(c.getPos().getNextPos(d), world)) // ignore
@@ -293,8 +328,9 @@ public class AI {
 					info i = new info();
 					i.lvl = lvl+1;
 					i.inChale = inf.inChale;
+					i.father = inf;
 					if (lvl == 1) {
-						i.father = inf;
+
 						i.d = d;
 						i.score = score;
 						i.pos = inf.pos.getNextPos(d);
@@ -303,18 +339,9 @@ public class AI {
 						i.score = score;
 						i.pos = inf.pos.getNextPos(d);
 					}
-					info alaki = new info();
-					alaki = i.father;
-					boolean flagContinue= false;
-					while (alaki != null){
-						if(alaki.pos.x == i.pos.x && alaki.pos.y== i.pos.y){
-							flagContinue = true;
-						}
-						alaki = alaki.father;
-					}
-					if (flagContinue)
-						continue;
+					
 					Q.add(i);
+					System.out.println("added: x: "+i.pos.x+" y: "+i.pos.y);
 
 				}
 
@@ -339,8 +366,6 @@ public class AI {
 						max_score = i.score;
 						last_direction = i.d;
 					}
-					else 
-						System.out.println(i.inChale);
 				}
 				else if (i.score > max_score){
 					max_score = i.score;
