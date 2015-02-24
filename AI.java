@@ -69,12 +69,12 @@ public class AI {
 					// System.out.println(bb);
 					if (isConnected.containsKey(bb)) {
 						HashMap<String, Boolean> ss = isConnected.get(bb);
-						// System.out.println(bb + "found one");
+						 System.out.println(bb + "found one");
 						if (ss.containsKey(id))
 							return true;
 
 					} else if (bb.equals(id)) {
-						// System.out.println("khodama hastam" + x + y);
+						 //System.out.println("khodama hastam" + x + y);
 						return true; // ???????????????????? chera dorsot kar
 										// nemikone :(
 
@@ -267,6 +267,7 @@ public class AI {
 						// if (world.getMyCells().size() == 1) {
 						// score -= 5000000; // never go there!
 						// } else {
+						System.out.println("inchale: x: "+b.getPos().x+" Y: "+b.getPos().y);
 						nextInf.inChale = true;
 						score -= 1200000;
 						// }
@@ -299,12 +300,7 @@ public class AI {
 					} else if (myvisite == -1) {
 						score -= 40;
 					}
-					if (myvisite <= 0 && nextInf.inChale == false) {
-						addVisited(c.getId(), b.getPos().x,
-								b.getPos().y, 1);
-
-					}
-
+					
 					// push
 				
 					nextInf.lvl = lvl + 1;
@@ -318,6 +314,12 @@ public class AI {
 					} else {
 						nextInf.d = inf.d;	
 					}
+					if (myvisite <= 0 && nextInf.inChale == false) {
+						addVisited(c.getId(), b.getPos().x,
+								b.getPos().y, 1);
+
+					}
+
 
 					Q.add(nextInf);
 					// System.out.println("added: x: "+i.pos.x+" y: "+i.pos.y);
