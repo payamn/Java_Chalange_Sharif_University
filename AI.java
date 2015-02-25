@@ -69,7 +69,7 @@ public class AI {
 					// System.out.println(bb);
 					if (isConnected.containsKey(bb)) {
 						HashMap<String, Boolean> ss = isConnected.get(bb);
-						 System.out.println(bb + "found one");
+//						 System.out.println(bb + "found one");
 						if (ss.containsKey(id))
 							return true;
 
@@ -93,8 +93,8 @@ public class AI {
 			if (a.containsKey(y)) {
 				HashMap<String, Integer> a1 = a.get(y);
 				if (a1.containsKey(id)) {
-					if (a1.get(id) == 20)
-						avoidChale = false;
+				//	if (a1.get(id) == 20)
+				//		avoidChale = false;
 
 					a1.put(id, a1.get(id) + status);
 					a.put(y, a1);
@@ -132,7 +132,7 @@ public class AI {
 
 	public void doTurn(World world) {
 		// System.out.println(world.getTurn());
-		if (world.getTurn() >= 370) {
+		if (world.getTurn() >= 1) {
 			avoidChale = false;
 		}
 		for (Cell c : world.getMyCells()) {
@@ -183,13 +183,19 @@ public class AI {
 				// lvl = Math.abs(inf.pos.x - c.getPos().x) + 1;
 				// else if (Math.abs(inf.pos.y - c.getPos().y) != 0)
 				// lvl = Math.abs(inf.pos.y - c.getPos().y) + 1;
-
+				// get block
+				
 				if (lvl == MAX_LEVEL)
 					break;
 
 				for (Direction d : Direction.values()) {
 					int score = inf.score;
-
+					Block b = null;
+					try {
+						b = world.getMap().at(inf.pos.getNextPos(d));
+					} catch (Exception e) {
+						continue;
+					}
 					info checkFather = new info();
 					checkFather = inf;
 					boolean flagContinue = false;
@@ -206,16 +212,11 @@ public class AI {
 						continue;
 
 					// System.out.println(inf.pos.getNextPos(d).y+" x: "+inf.pos.getNextPos(d).x);
-					if (!isPossible(inf.pos, d, world))
+					if (!isPossible(inf.pos, d, world)&& !b.getType().equals(Constants.BLOCK_TYPE_NONE))
 						continue;
 
-					// get block
-					Block b = null;
-					try {
-						b = world.getMap().at(inf.pos.getNextPos(d));
-					} catch (Exception e) {
-						continue;
-					}
+					
+					info nextInf = new info();
 
 					// bug fix -> impassible check
 					if (b.getType().equals(Constants.BLOCK_TYPE_IMPASSABLE))
@@ -252,32 +253,35 @@ public class AI {
 
 					} else if (b.getType().equals(Constants.BLOCK_TYPE_NONE)) {
 						// notFound.add(inf.pos.getNextPos(d));
-						score += 500000;
-
+						score += 50000;
+						nextInf.isNoneBlock = true;
+						
 					} else if (b.getType().equals(Constants.BLOCK_TYPE_NORMAL)) {
 						score -= 5;
 					} 
-					info nextInf = new info();
 					// check for height
-					if (b.getHeight()
+					if (b.getPos().x==10&&b.getPos().y==7){
+						System.out.println("chera vaghan type: "+b.getType()+" ertefa b: "+b.getHeight()+" inf: "+ world.getMap().at(inf.pos).getHeight()+" turn: "+world.getTurn());
+					}
+					if (!b.getType().equals(Constants.BLOCK_TYPE_NONE)&&b.getHeight()
 									- world.getMap().at(inf.pos).getHeight() < -2
 							&& connected(c.getId(), b.getPos().x,
 									b.getPos().y) == false) {
-
-						// if (world.getMyCells().size() == 1) {
+						System.out.println(b.getType().equals(Constants.BLOCK_TYPE_NONE)+"****im in none if turn: "+world.getTurn());
+						// if (world.getMyCells().size() == 1) { 
 						// score -= 5000000; // never go there!
 						// } else {
 						System.out.println("inchale: x: "+b.getPos().x+" Y: "+b.getPos().y);
 						nextInf.inChale = true;
-						score -= 1200000;
+						score -= 1;
 						// }
 					}
 					
 					if (lvl == 1) {
-						if (isDanger(c.getPos().getNextPos(d), world)) // ignore
-																		// the
-																		// move
-							continue;
+//						if (isDanger(c.getPos().getNextPos(d), world)) // ignore
+//																		// the
+//																		// move
+//							continue;
 					 	boolean skip = false;
 
 						for (Cell c1 : world.getMyCells()) {
@@ -304,6 +308,8 @@ public class AI {
 					// push
 				
 					nextInf.lvl = lvl + 1;
+					if (nextInf.isNoneBlock == false)
+						nextInf.isNoneBlock = inf.isNoneBlock;
 					if (nextInf.inChale == false)
 						nextInf.inChale = inf.inChale;
 					nextInf.father = inf;
@@ -314,7 +320,7 @@ public class AI {
 					} else {
 						nextInf.d = inf.d;	
 					}
-					if (myvisite <= 0 && nextInf.inChale == false) {
+					if (myvisite <= 0 && nextInf.inChale == false && !nextInf.isNoneBlock) {
 						addVisited(c.getId(), b.getPos().x,
 								b.getPos().y, 1);
 
@@ -332,7 +338,7 @@ public class AI {
 			int max_score = Integer.MIN_VALUE;
 
 			Direction last_direction = Direction.values()[rnd.nextInt(6)];
-// injaro baiad badan vardarim
+			// injaro baiad badan vardarim
 			if (Q.isEmpty())
 				System.err.println("chera q khalie");
 			while (!Q.isEmpty()) {
@@ -377,26 +383,26 @@ public class AI {
 		return false;
 	}
 
-	public static boolean isDanger(Position p, World w) {
-		// max height!
-		int count = 0;
-
-		for (Direction d : Direction.values()) {
-			Position pos = p.getNextPos(d);
-			try {
-				if (w.getMap().at(pos).getHeight()
-						- w.getMap().at(p).getHeight() > 2) {
-					++count;
-				}
-			} catch (Exception e) {
-
-			}
-		}
-		if (count < 5)
-			return false;
-		System.err.println("too dangeram <3");
-		return true;
-	}
+//	public static boolean isDanger(Position p, World w) {
+//		// max height!
+//		int count = 0;
+//
+//		for (Direction d : Direction.values()) {
+//			Position pos = p.getNextPos(d);
+//			try {
+//				if (w.getMap().at(pos).getHeight()
+//						- w.getMap().at(p).getHeight() > 2) {
+//					++count;
+//				}
+//			} catch (Exception e) {
+//
+//			}
+//		}
+//		if (count < 5)
+//			return false;
+//		System.err.println("too dangeram <3");
+//		return true;
+//	}
 
 	public static boolean isPossible(Position last, Direction d, World w) {
 		// is it possible to go there? :|
@@ -420,9 +426,10 @@ class info {
 	public short path_size;
 	public boolean mitosis;
 	public int lvl;
-
+	public boolean isNoneBlock;
 	public info(Direction d, int score, Position p, int level) {
 		this.d = d;
+		isNoneBlock = false;
 		this.score = score;
 		pos = p;
 		mitosis = false;
