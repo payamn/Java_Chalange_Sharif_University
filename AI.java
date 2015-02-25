@@ -8,9 +8,11 @@ import common.util.Constants;
 import common.util.ServerConstants;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Random;
+import java.util.Set;
 import java.util.Timer;
 import java.util.Vector;
 
@@ -30,8 +32,8 @@ import com.sun.xml.internal.fastinfoset.algorithm.BuiltInEncodingAlgorithm.WordL
 public class AI {
 
 	private static boolean avoidChale = true;
-	private static final int MAX_LEVEL = 5;
-	private static Vector<Position> MitosisBlocks = new Vector<Position>();
+	private static final int MAX_LEVEL = 7;
+	private static HashSet<Integer> MitosisBlocks = new HashSet<Integer>();
 	private static Vector<Position> ResourceBlocks = new Vector<Position>();
 	private static Vector<Position> notFound = new Vector<Position>();
 	private static HashMap<String, HashMap<String, Boolean>> isConnected = new HashMap<String, HashMap<String, Boolean>>();
@@ -132,7 +134,7 @@ public class AI {
 
 	public void doTurn(World world) {
 		// System.out.println(world.getTurn());
-		if (world.getTurn() >= 100) {
+		if (world.getTurn() >= 340) {
 			avoidChale = false;
 		}
 		for (Cell c : world.getMyCells()) {
@@ -224,6 +226,7 @@ public class AI {
 
 					if (b.getType().equals(Constants.BLOCK_TYPE_MITOSIS)
 							&& !inf.mitosis) {
+						
 						// if (!visited(inf.pos.getNextPos(d), MitosisBlocks))
 						// MitosisBlocks.add(inf.pos.getNextPos(d));
 
@@ -437,7 +440,7 @@ class info {
 	public Position pos;
 	public short path_size;
 	public boolean mitosis;
-	public short canResource;
+	public int canResource;
 	public int lvl;
 	public boolean isNoneBlock;
 	public info(Direction d, int score, Position p, int level) {
