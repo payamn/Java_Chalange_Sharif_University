@@ -39,100 +39,154 @@ public class AI {
 	private static HashMap<String, HashMap<String, Boolean>> isConnected = new HashMap<String, HashMap<String, Boolean>>();
 	// private static HashMap<Cell, Vector<Position>> cell_visited = new
 	// HashMap<Cell, Vector<Position>>();
-	private static HashMap<Integer, HashMap<Integer, HashMap<String, Integer>>> visitedMap = new HashMap<Integer, HashMap<Integer, HashMap<String, Integer>>>();
+	// private static HashMap<Integer, HashMap<Integer, HashMap<String,
+	// Integer>>> visitedMap = new HashMap<Integer, HashMap<Integer,
+	// HashMap<String, Integer>>>();
+	private static visitedInfo[][] visitedMapArray = null;
+
 	Random rnd = new Random();
 
 	private int isVisitedBy(String id, int x, int y) { // 2 means found but not
 														// with this id, 1 means
 		// System.out.println("x: "+x+" y: "+y); // found and this cell
 		// visit it before
-		if (visitedMap.containsKey(x)) {
-			HashMap<Integer, HashMap<String, Integer>> a = visitedMap.get(x);
-			if (a.containsKey(y)) {
-				HashMap<String, Integer> a1 = a.get(y);
-				if (a1.containsKey(id)) {
-
-					return a1.get(id);
-				} else {
-					return -1;
-				}
-			}
+		if (visitedMapArray[x][y].visitedBy.containsKey(id))
+			return visitedMapArray[x][y].visitedBy.get(id);
+		if (visitedMapArray[x][y].visitedBy.keySet().size()>0){
+			return -1;
 		}
 		return 0;
+//		if (visitedMap.containsKey(x)) {
+//			HashMap<Integer, HashMap<String, Integer>> a = visitedMap.get(x);
+//			if (a.containsKey(y)) {
+//				HashMap<String, Integer> a1 = a.get(y);
+//				if (a1.containsKey(id)) {
+//
+//					return a1.get(id);
+//				} else {
+//					return -1;
+//				}
+//			}
+//		}
+//		return 0;
 	}
 
 	private Boolean connected(String id, int x, int y) {
 		// System.out.println("-0-0-0-0-0- in conected");
-		if (visitedMap.containsKey(x)) {
-			HashMap<Integer, HashMap<String, Integer>> a = visitedMap.get(x);
-			if (a.containsKey(y)) {
-				HashMap<String, Integer> a1 = a.get(y);
-				for (String bb : a1.keySet()) {
-					// System.out.println(bb);
-					if (isConnected.containsKey(bb)) {
-						HashMap<String, Boolean> ss = isConnected.get(bb);
-//						 System.out.println(bb + "found one");
-						if (ss.containsKey(id))
-							return true;
+		if (visitedMapArray[x][y].visitedBy.keySet().size()>0){
+			for (String bb : visitedMapArray[x][y].visitedBy.keySet())
+				if (isConnected.containsKey(bb)) {
+					HashMap<String, Boolean> ss = isConnected.get(bb);
+					// System.out.println(bb + "found one");
+					if (ss.containsKey(id))
+						return true;
 
-					} else if (bb.equals(id)) {
-						 //System.out.println("khodama hastam" + x + y);
-						return true; // ???????????????????? chera dorsot kar
-										// nemikone :(
+				} else if (bb.equals(id)) {
+					// System.out.println("khodama hastam" + x + y);
+					return true; // ???????????????????? chera dorsot kar
+									// nemikone :(
 
-					}
 				}
-			}
 		}
+//		}
+//		if (visitedMap.containsKey(x)) {
+//			HashMap<Integer, HashMap<String, Integer>> a = visitedMap.get(x);
+//			if (a.containsKey(y)) {
+//				HashMap<String, Integer> a1 = a.get(y);
+//				for (String bb : a1.keySet()) {
+//					// System.out.println(bb);
+//					if (isConnected.containsKey(bb)) {
+//						HashMap<String, Boolean> ss = isConnected.get(bb);
+//						// System.out.println(bb + "found one");
+//						if (ss.containsKey(id))
+//							return true;
+//
+//					} else if (bb.equals(id)) {
+//						// System.out.println("khodama hastam" + x + y);
+//						return true; // ???????????????????? chera dorsot kar
+//										// nemikone :(
+//
+//					}
+//				}
+//			}
+//		}
 
 		return false;
 	}
 
 	private void addVisited(String id, int x, int y, int status) {
-		// System.out.println("added x: " + x + " added y: " + y);
-		if (visitedMap.containsKey(x)) {
-			HashMap<Integer, HashMap<String, Integer>> a = visitedMap.get(x);
-			if (a.containsKey(y)) {
-				HashMap<String, Integer> a1 = a.get(y);
-				if (a1.containsKey(id)) {
-				//	if (a1.get(id) == 20)
-				//		avoidChale = false;
-
-					a1.put(id, a1.get(id) + status);
-					a.put(y, a1);
-					visitedMap.put(x, a);
-				} else {
-					for (String komaki : a1.keySet()) {
-						HashMap<String, Boolean> added1 = new HashMap<String, Boolean>();
-						added1.put(komaki, true);
-						HashMap<String, Boolean> added2 = new HashMap<String, Boolean>();
-						added2.put(id, true);
-						isConnected.put(komaki, added2);
-						isConnected.put(id, added1);
-
-					}
-					a1.put(id, status);
-					a.put(y, a1);
-					visitedMap.put(x, a);
-				}
-			} else {
-				HashMap<String, Integer> a1 = new HashMap<String, Integer>();
-				a1.put(id, status);
-				a.put(y, a1);
-				visitedMap.put(x, a);
-			}
-		} else {
-			HashMap<Integer, HashMap<String, Integer>> a = new HashMap<Integer, HashMap<String, Integer>>();
-			HashMap<String, Integer> a1 = new HashMap<String, Integer>();
-			a1.put(id, status);
-			a.put(y, a1);
-			visitedMap.put(x, a);
-			// System.out.println("mamuli");
-
+		
+		if (visitedMapArray[x][y].visitedBy.containsKey(id)){
+			visitedMapArray[x][y].visitedBy.put(id, visitedMapArray[x][y].visitedBy.get(id)+status);
 		}
+		else{
+			visitedMapArray[x][y].visitedBy.put(id,status);
+		}
+		
+		
+		
+		// System.out.println("added x: " + x + " added y: " + y);
+//		if (visitedMap.containsKey(x)) {
+//			HashMap<Integer, HashMap<String, Integer>> a = visitedMap.get(x);
+//			if (a.containsKey(y)) {
+//				HashMap<String, Integer> a1 = a.get(y);
+//				if (a1.containsKey(id)) {
+//					// if (a1.get(id) == 20)
+//					// avoidChale = false;
+//
+//					a1.put(id, a1.get(id) + status);
+//					a.put(y, a1);
+//					visitedMap.put(x, a);
+//				} else {
+//					for (String komaki : a1.keySet()) {
+//						HashMap<String, Boolean> added1 = new HashMap<String, Boolean>();
+//						added1.put(komaki, true);
+//						HashMap<String, Boolean> added2 = new HashMap<String, Boolean>();
+//						added2.put(id, true);
+//						isConnected.put(komaki, added2);
+//						isConnected.put(id, added1);
+//
+//					}
+//					a1.put(id, status);
+//					a.put(y, a1);
+//					visitedMap.put(x, a);
+//				}
+//			} else {
+//				HashMap<String, Integer> a1 = new HashMap<String, Integer>();
+//				a1.put(id, status);
+//				a.put(y, a1);
+//				visitedMap.put(x, a);
+//			}
+//		} else {
+//			HashMap<Integer, HashMap<String, Integer>> a = new HashMap<Integer, HashMap<String, Integer>>();
+//			HashMap<String, Integer> a1 = new HashMap<String, Integer>();
+//			a1.put(id, status);
+//			a.put(y, a1);
+//			visitedMap.put(x, a);
+//			// System.out.println("mamuli");
+//
+//		}
 	}
 
 	public void doTurn(World world) {
+		if (visitedMapArray == null) {
+			Class c = new visitedInfo().getClass();
+			visitedInfo[] a0 = (visitedInfo[]) java.lang.reflect.Array
+					.newInstance(c, 0);
+			visitedMapArray = (visitedInfo[][]) java.lang.reflect.Array
+					.newInstance(a0.getClass(),
+							world.getMapSize().getWidth() + 1);
+			for (int i = 0; i < world.getMapSize().getWidth(); i++) {
+				visitedMapArray[i] = (visitedInfo[])java.lang.reflect.Array.newInstance(c, world.getMapSize().getHeight()+1);
+			}
+			
+			for (int i = 0; i < world.getMapSize().getWidth(); i++) {
+				for (int j = 0; j < world.getMapSize().getHeight(); j++) {
+					visitedMapArray[i][j]= new visitedInfo();
+				}
+			}
+
+		}
 		// System.out.println(world.getTurn());
 		if (world.getTurn() >= 340) {
 			avoidChale = false;
@@ -186,7 +240,7 @@ public class AI {
 				// else if (Math.abs(inf.pos.y - c.getPos().y) != 0)
 				// lvl = Math.abs(inf.pos.y - c.getPos().y) + 1;
 				// get block
-				
+
 				if (lvl == MAX_LEVEL)
 					break;
 
@@ -214,10 +268,10 @@ public class AI {
 						continue;
 
 					// System.out.println(inf.pos.getNextPos(d).y+" x: "+inf.pos.getNextPos(d).x);
-					if (!isPossible(inf.pos, d, world)&& !b.getType().equals(Constants.BLOCK_TYPE_NONE))
+					if (!isPossible(inf.pos, d, world)
+							&& !b.getType().equals(Constants.BLOCK_TYPE_NONE))
 						continue;
 
-					
 					info nextInf = new info();
 					nextInf.canResource = inf.canResource;
 					// bug fix -> impassible check
@@ -226,7 +280,7 @@ public class AI {
 
 					if (b.getType().equals(Constants.BLOCK_TYPE_MITOSIS)
 							&& !inf.mitosis) {
-						
+
 						// if (!visited(inf.pos.getNextPos(d), MitosisBlocks))
 						// MitosisBlocks.add(inf.pos.getNextPos(d));
 
@@ -240,63 +294,72 @@ public class AI {
 						// if (!visited(inf.pos.getNextPos(d), ResourceBlocks))
 						// ResourceBlocks.add(inf.pos.getNextPos(d));
 
-						if (inf.canResource+c.getEnergy() <= Constants.CELL_MIN_ENERGY_FOR_MITOSIS) {
+						if (inf.canResource + c.getEnergy() <= Constants.CELL_MIN_ENERGY_FOR_MITOSIS) {
 							// score += 9000;
-							int thisResource = Constants.CELL_MIN_ENERGY_FOR_MITOSIS - (inf.canResource+c.getEnergy());
-							if (b.getResource()<thisResource){
+							int thisResource = Constants.CELL_MIN_ENERGY_FOR_MITOSIS
+									- (inf.canResource + c.getEnergy());
+							if (b.getResource() < thisResource) {
 								thisResource = b.getResource();
 							}
-							nextInf.canResource +=thisResource;
+							nextInf.canResource += thisResource;
 							if (world.getTurn() > 340)
-								score += (120000*thisResource)/lvl;
+								score += (120000 * thisResource) / lvl;
 							else
-								score += (12000*thisResource)/lvl;
+								score += (12000 * thisResource) / lvl;
 							// c.move(d);
 							// return ;
-						} else if (inf.canResource+c.getEnergy() < Constants.CELL_MAX_ENERGY) {
-							int thisResource = Constants.CELL_MAX_ENERGY - (inf.canResource+c.getEnergy());
-							if (b.getResource()<thisResource){
+						} else if (inf.canResource + c.getEnergy() < Constants.CELL_MAX_ENERGY) {
+							int thisResource = Constants.CELL_MAX_ENERGY
+									- (inf.canResource + c.getEnergy());
+							if (b.getResource() < thisResource) {
 								thisResource = b.getResource();
 							}
 							if (world.getTurn() > 340)
-								score += (1200*thisResource)/lvl;
-							
-							nextInf.canResource +=thisResource;
-							
+								score += (1200 * thisResource) / lvl;
+
+							nextInf.canResource += thisResource;
+
 						}
 
 					} else if (b.getType().equals(Constants.BLOCK_TYPE_NONE)) {
 						// notFound.add(inf.pos.getNextPos(d));
-						score += 12000/lvl;
+						score += 12000 / lvl;
 						nextInf.isNoneBlock = true;
-						
+
 					} else if (b.getType().equals(Constants.BLOCK_TYPE_NORMAL)) {
 						score -= 5;
-					} 
-					// check for height
-					if (b.getPos().x==10&&b.getPos().y==7){
-						System.out.println("chera vaghan type: "+b.getType()+" ertefa b: "+b.getHeight()+" inf: "+ world.getMap().at(inf.pos).getHeight()+" turn: "+world.getTurn());
 					}
-					if (!b.getType().equals(Constants.BLOCK_TYPE_NONE)&&b.getHeight()
+					// check for height
+					if (b.getPos().x == 10 && b.getPos().y == 7) {
+						System.out.println("chera vaghan type: " + b.getType()
+								+ " ertefa b: " + b.getHeight() + " inf: "
+								+ world.getMap().at(inf.pos).getHeight()
+								+ " turn: " + world.getTurn());
+					}
+					if (!b.getType().equals(Constants.BLOCK_TYPE_NONE)
+							&& b.getHeight()
 									- world.getMap().at(inf.pos).getHeight() < -2
-							&& connected(c.getId(), b.getPos().x,
-									b.getPos().y) == false) {
-						System.out.println(b.getType().equals(Constants.BLOCK_TYPE_NONE)+"****im in none if turn: "+world.getTurn());
-						// if (world.getMyCells().size() == 1) { 
+							&& connected(c.getId(), b.getPos().x, b.getPos().y) == false) {
+						System.out.println(b.getType().equals(
+								Constants.BLOCK_TYPE_NONE)
+								+ "****im in none if turn: " + world.getTurn());
+						// if (world.getMyCells().size() == 1) {
 						// score -= 5000000; // never go there!
 						// } else {
-						System.out.println("inchale: x: "+b.getPos().x+" Y: "+b.getPos().y);
+						System.out.println("inchale: x: " + b.getPos().x
+								+ " Y: " + b.getPos().y);
 						nextInf.inChale = true;
 						score -= 200;
 						// }
 					}
-					
+
 					if (lvl == 1) {
-//						if (isDanger(c.getPos().getNextPos(d), world)) // ignore
-//																		// the
-//																		// move
-//							continue;
-					 	boolean skip = false;
+						// if (isDanger(c.getPos().getNextPos(d), world)) //
+						// ignore
+						// // the
+						// // move
+						// continue;
+						boolean skip = false;
 
 						for (Cell c1 : world.getMyCells()) {
 							if (c1.getPos().x == inf.pos.getNextPos(d).x
@@ -318,9 +381,9 @@ public class AI {
 					} else if (myvisite == -1) {
 						score -= 90;
 					}
-					
+
 					// push
-				
+
 					nextInf.lvl = lvl + 1;
 					if (nextInf.isNoneBlock == false)
 						nextInf.isNoneBlock = inf.isNoneBlock;
@@ -332,14 +395,13 @@ public class AI {
 					if (lvl == 1) {
 						nextInf.d = d;
 					} else {
-						nextInf.d = inf.d;	
+						nextInf.d = inf.d;
 					}
-					if (myvisite <= 0 && nextInf.inChale == false && !nextInf.isNoneBlock) {
-						addVisited(c.getId(), b.getPos().x,
-								b.getPos().y, 1);
+					if (myvisite <= 0 && nextInf.inChale == false
+							&& !nextInf.isNoneBlock) {
+						addVisited(c.getId(), b.getPos().x, b.getPos().y, 1);
 
 					}
-
 
 					Q.add(nextInf);
 					// System.out.println("added: x: "+i.pos.x+" y: "+i.pos.y);
@@ -352,7 +414,7 @@ public class AI {
 			int max_score = Integer.MIN_VALUE;
 
 			Direction last_direction = Direction.values()[rnd.nextInt(6)];
-			
+
 			// injaro baiad badan vardarim
 			if (Q.isEmpty())
 				System.err.println("chera q khalie");
@@ -398,26 +460,26 @@ public class AI {
 		return false;
 	}
 
-//	public static boolean isDanger(Position p, World w) {
-//		// max height!
-//		int count = 0;
-//
-//		for (Direction d : Direction.values()) {
-//			Position pos = p.getNextPos(d);
-//			try {
-//				if (w.getMap().at(pos).getHeight()
-//						- w.getMap().at(p).getHeight() > 2) {
-//					++count;
-//				}
-//			} catch (Exception e) {
-//
-//			}
-//		}
-//		if (count < 5)
-//			return false;
-//		System.err.println("too dangeram <3");
-//		return true;
-//	}
+	// public static boolean isDanger(Position p, World w) {
+	// // max height!
+	// int count = 0;
+	//
+	// for (Direction d : Direction.values()) {
+	// Position pos = p.getNextPos(d);
+	// try {
+	// if (w.getMap().at(pos).getHeight()
+	// - w.getMap().at(p).getHeight() > 2) {
+	// ++count;
+	// }
+	// } catch (Exception e) {
+	//
+	// }
+	// }
+	// if (count < 5)
+	// return false;
+	// System.err.println("too dangeram <3");
+	// return true;
+	// }
 
 	public static boolean isPossible(Position last, Direction d, World w) {
 		// is it possible to go there? :|
@@ -443,6 +505,7 @@ class info {
 	public int canResource;
 	public int lvl;
 	public boolean isNoneBlock;
+
 	public info(Direction d, int score, Position p, int level) {
 		this.d = d;
 		canResource = 0;
@@ -458,4 +521,18 @@ class info {
 	public info() {
 	}
 
+}
+
+class visitedInfo{
+	public HashMap<String, Integer> visitedBy;
+	public boolean [] able2move = new boolean[6];
+	public visitedInfo() {
+		visitedBy = new HashMap<String, Integer>();
+		for (int i = 0; i < 6; i++) {
+			able2move[i] = false;
+		}
+	}
+	public void setAble2move(Direction d){
+		able2move[d.ordinal()] = true;
+	}
 }
