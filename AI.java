@@ -132,7 +132,7 @@ public class AI {
 
 	public void doTurn(World world) {
 		// System.out.println(world.getTurn());
-		if (world.getTurn() >= 1) {
+		if (world.getTurn() >= 100) {
 			avoidChale = false;
 		}
 		for (Cell c : world.getMyCells()) {
@@ -217,7 +217,7 @@ public class AI {
 
 					
 					info nextInf = new info();
-
+					nextInf.canResource = inf.canResource;
 					// bug fix -> impassible check
 					if (b.getType().equals(Constants.BLOCK_TYPE_IMPASSABLE))
 						continue; // goto next direction
@@ -228,7 +228,7 @@ public class AI {
 						// MitosisBlocks.add(inf.pos.getNextPos(d));
 
 						if (c.getEnergy() >= Constants.CELL_MIN_ENERGY_FOR_MITOSIS) {
-							score += 190000 / lvl;
+							score += 120000 / lvl;
 						}
 
 					} else if (b.getType()
@@ -237,23 +237,34 @@ public class AI {
 						// if (!visited(inf.pos.getNextPos(d), ResourceBlocks))
 						// ResourceBlocks.add(inf.pos.getNextPos(d));
 
-						if (c.getEnergy() < Constants.CELL_MIN_ENERGY_FOR_MITOSIS) {
+						if (inf.canResource+c.getEnergy() <= Constants.CELL_MIN_ENERGY_FOR_MITOSIS) {
 							// score += 9000;
+							int thisResource = Constants.CELL_MIN_ENERGY_FOR_MITOSIS - (inf.canResource+c.getEnergy());
+							if (b.getResource()<thisResource){
+								thisResource = b.getResource();
+							}
+							nextInf.canResource +=thisResource;
 							if (world.getTurn() > 340)
-								score += 1500000/lvl;
+								score += (120000*thisResource)/lvl;
 							else
-								score += 100000/lvl;
+								score += (12000*thisResource)/lvl;
 							// c.move(d);
 							// return ;
-						} else if (c.getEnergy() < Constants.CELL_MAX_ENERGY) {
+						} else if (inf.canResource+c.getEnergy() < Constants.CELL_MAX_ENERGY) {
+							int thisResource = Constants.CELL_MAX_ENERGY - (inf.canResource+c.getEnergy());
+							if (b.getResource()<thisResource){
+								thisResource = b.getResource();
+							}
 							if (world.getTurn() > 340)
-								score += 40000/lvl;
-							score += 80/lvl;
+								score += (1200*thisResource)/lvl;
+							
+							nextInf.canResource +=thisResource;
+							
 						}
 
 					} else if (b.getType().equals(Constants.BLOCK_TYPE_NONE)) {
 						// notFound.add(inf.pos.getNextPos(d));
-						score += 50000;
+						score += 12000/lvl;
 						nextInf.isNoneBlock = true;
 						
 					} else if (b.getType().equals(Constants.BLOCK_TYPE_NORMAL)) {
@@ -273,7 +284,7 @@ public class AI {
 						// } else {
 						System.out.println("inchale: x: "+b.getPos().x+" Y: "+b.getPos().y);
 						nextInf.inChale = true;
-						score -= 1;
+						score -= 200;
 						// }
 					}
 					
@@ -302,7 +313,7 @@ public class AI {
 						// System.out.println(visited);
 						score -= 100 * myvisite;
 					} else if (myvisite == -1) {
-						score -= 40;
+						score -= 90;
 					}
 					
 					// push
@@ -338,6 +349,7 @@ public class AI {
 			int max_score = Integer.MIN_VALUE;
 
 			Direction last_direction = Direction.values()[rnd.nextInt(6)];
+			
 			// injaro baiad badan vardarim
 			if (Q.isEmpty())
 				System.err.println("chera q khalie");
@@ -425,10 +437,12 @@ class info {
 	public Position pos;
 	public short path_size;
 	public boolean mitosis;
+	public short canResource;
 	public int lvl;
 	public boolean isNoneBlock;
 	public info(Direction d, int score, Position p, int level) {
 		this.d = d;
+		canResource = 0;
 		isNoneBlock = false;
 		this.score = score;
 		pos = p;
