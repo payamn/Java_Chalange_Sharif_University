@@ -59,13 +59,18 @@ public class AI {
 	private enamyFound bestAttackDirecation(Position p) {
 		enamyFound myEnam = new enamyFound();
 		myEnam.enamyEnergy = Short.MAX_VALUE;
+		
+		for (int en : enamyCells.keySet()){
+			System.out.println("x= "+en%1000+" y: "+en/1000);
+		}
+		
 		for (Direction d : Direction.values()) {
 			if (enamyCells.containsKey(p.getNextPos(d).x + p.getNextPos(d).y
 					* 1000)) {
 				if (enamyCells
 						.get(p.getNextPos(d).x + p.getNextPos(d).y * 1000) < myEnam.enamyEnergy
 						&& enamyCells.get(p.getNextPos(d).x + p.getNextPos(d).y
-								* 1000) > 0) {
+								* 1000) >= 0) {
 					myEnam.FoundedEnamy += 1;
 					myEnam.enamyEnergy = enamyCells.get(p.getNextPos(d).x
 							+ p.getNextPos(d).y * 1000);
@@ -226,6 +231,7 @@ public class AI {
 		for (Cell c : world.getEnemyCells()) {
 			enamyCells.put(c.getPos().x + c.getPos().y * 1000,
 					(short) c.getEnergy());
+			System.out.println("enargy cell: "+enamyCells.get(c.getPos().x + c.getPos().y * 1000)+" "+c.getEnergy());
 		}
 		// System.out.println(world.getTurn());
 		if (world.getTurn() >= 340) {
@@ -372,17 +378,18 @@ public class AI {
 					}
 					// check for height
 					//System.out.println(c.getJump());
-					if (!b.getType().equals(Constants.BLOCK_TYPE_NONE)
+					if ((!b.getType().equals(Constants.BLOCK_TYPE_NONE)
 							&& getHeightBlock(b.getPos(), world)
 									- getHeightBlock(world.getMap().at(inf.pos)
 											.getPos(), world) < -1
-									* c.getJump()   ||
+									* c.getJump()   )||
 									(trapResources.containsKey(b.getPos().x+b.getPos().y*1000)&&trapResources.get(b.getPos().x+b.getPos().y*1000)<=c.getJump())) {
-						if (!visitedMapArray[inf.pos.x][inf.pos.y]
+						if ((!visitedMapArray[inf.pos.x][inf.pos.y]
 								.getAble2move(d)
 								&& connected(c.getId(), b.getPos().x,
-										b.getPos().y) == false) {
-						nextInf.inChale = true;
+										b.getPos().y) == false  ) ||
+												(trapResources.containsKey(b.getPos().x+b.getPos().y*1000)&&trapResources.get(b.getPos().x+b.getPos().y*1000)<=c.getJump())) {
+							nextInf.inChale = true;
 							score -= 200;
 							// }
 						} else {
@@ -498,17 +505,24 @@ public class AI {
 						c.gainResource();
 						continue;
 					}
-				}
-				else if (canMoveAfterGainRes(c, last_direction, world)==false){
-					if (!trapResources.containsKey(c.getPos().x+c.getPos().y*1000))
-						trapResources.put(c.getPos().x+c.getPos().y*1000, c.getJump());
-					else
-						trapResources.put(c.getPos().x+c.getPos().y*1000, Math.max(c.getJump(), trapResources.get(c.getPos().x+c.getPos().y*1000)));
-				}
+					else if (canMoveAfterGainRes(c, last_direction, world)==false){
+						System.out.println("in can move");
+						if (!trapResources.containsKey(c.getPos().x+c.getPos().y*1000))
+							trapResources.put(c.getPos().x+c.getPos().y*1000, c.getJump());
+						else
+							trapResources.put(c.getPos().x+c.getPos().y*1000, Math.max(c.getJump(), trapResources.get(c.getPos().x+c.getPos().y*1000)));
+					}
 
+				}
+			
+			}
+			System.out.println("my enamy:");
+			for (Cell cc: world.getEnemyCells()){
+				System.out.println(cc.getPos().x+" y: "+cc.getPos().y);
 			}
 			enamyFound enamyFoundNear = bestAttackDirecation(c.getPos());
 			if (enamyFoundNear.FoundedEnamy > 0) {
+				
 				System.out.println("attacking "+enamyFoundNear.FoundedEnamy);
 				attack(c, enamyFoundNear.attackDirection, c.getPos()
 						.getNextPos(enamyFoundNear.attackDirection));
@@ -630,7 +644,7 @@ class info {
 }
 
 class enamyFound {
-	public short FoundedEnamy;
+	public short FoundedEnamy=0;
 	public Direction attackDirection;
 	public short enamyEnergy = 0;
 
