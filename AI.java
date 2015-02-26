@@ -352,6 +352,13 @@ public class AI {
 						// MitosisBlocks.add(inf.pos.getNextPos(d));
 
 						if (c.getEnergy() >= Constants.CELL_MIN_ENERGY_FOR_MITOSIS) {
+							if (b.getGainImprovementAmount()>0)
+								score += 100*b.getGainImprovementAmount();
+							
+							if (b.getDepthOfFieldImprovementAmount()>0)
+								score += 80*b.getDepthOfFieldImprovementAmount();
+							if (b.getAttackImprovementAmount()>0)
+								score += 120*b.getAttackImprovementAmount();
 							score += 1200000 / lvl;
 						}
 
