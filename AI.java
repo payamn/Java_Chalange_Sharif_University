@@ -7,6 +7,7 @@ import common.model.Position;
 import common.util.Constants;
 import common.util.ServerConstants;
 
+import java.beans.DesignMode;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -33,6 +34,7 @@ public class AI {
 
 	private static boolean avoidChale = true;
 	private static final int MAX_LEVEL = 12;
+	private static HashMap<Integer, Short> enamyCells = null;
 	private static HashSet<Integer> MitosisBlocks = new HashSet<Integer>();
 	private static Vector<Position> ResourceBlocks = new Vector<Position>();
 	private static Vector<Position> notFound = new Vector<Position>();
@@ -45,6 +47,26 @@ public class AI {
 	private static visitedInfo[][] visitedMapArray = null;
 
 	Random rnd = new Random();
+
+	private enamyFound bestAttackDirecation(Position p) {
+		enamyFound myEnam = new enamyFound();
+		myEnam.enamyEnergy = Short.MAX_VALUE;
+		for (Direction d : Direction.values()) {
+			if (enamyCells.containsKey(p.getNextPos(d).x + p.getNextPos(d).y
+					* 1000)) {
+				if (enamyCells
+						.get(p.getNextPos(d).x + p.getNextPos(d).y * 1000) < myEnam.enamyEnergy) {
+					myEnam.FoundedEnamy += 1;
+					myEnam.enamyEnergy = enamyCells.get(p.getNextPos(d).x
+							+ p.getNextPos(d).y * 1000);
+					myEnam.attackDirection = d;
+				}
+			}
+
+		}
+		return myEnam;
+
+	}
 
 	private int isVisitedBy(String id, int x, int y) { // 2 means found but not
 														// with this id, 1 means
@@ -114,15 +136,20 @@ public class AI {
 		return false;
 	}
 
-	private void addVisited(String id, int x, int y, int status) {
-
-		if (visitedMapArray[x][y].visitedBy.containsKey(id)) {
-			visitedMapArray[x][y].visitedBy.put(id,
-					visitedMapArray[x][y].visitedBy.get(id) + status);
-		} else {
-			visitedMapArray[x][y].visitedBy.put(id, status);
+	private void addVisited(String id, int x, int y, int status,int turn) {
+		if (status == 1){
+			visitedMapArray[x][y].visitedBy.put(id, 1);
 		}
+		else {
+			if (visitedMapArray[x][y].visitedBy.containsKey(id)) {
+				visitedMapArray[x][y].visitedBy.put(id,turn);
+			} else {
+				visitedMapArray[x][y].visitedBy.put(id,turn );
+			}
 
+		}
+	}
+		
 		// System.out.println("added x: " + x + " added y: " + y);
 		// if (visitedMap.containsKey(x)) {
 		// HashMap<Integer, HashMap<String, Integer>> a = visitedMap.get(x);
@@ -165,7 +192,7 @@ public class AI {
 		// // System.out.println("mamuli");
 		//
 		// }
-	}
+	
 
 	public void doTurn(World world) {
 		if (visitedMapArray == null) {
@@ -187,35 +214,40 @@ public class AI {
 			}
 
 		}
+		enamyCells = new HashMap<Integer, Short>();
+		for (Cell c : world.getEnemyCells()) {
+			enamyCells.put(c.getPos().x + c.getPos().y * 1000,
+					(short) c.getEnergy());
+		}
 		// System.out.println(world.getTurn());
 		if (world.getTurn() >= 340) {
 			avoidChale = false;
 		}
 		for (Cell c : world.getMyCells()) {
-			addVisited(c.getId(), c.getPos().x, c.getPos().y, 2);
+			addVisited(c.getId(), c.getPos().x, c.getPos().y, 2,world.getTurn());
 		}
 
 		for (Cell c : world.getMyCells()) {
 			// System.out.println(c.getId());
-			if (world.getMap().at(c.getPos()).getType()
-					.equals(Constants.BLOCK_TYPE_MITOSIS)
-					&& c.getEnergy() >= Constants.CELL_MIN_ENERGY_FOR_MITOSIS) {
-				c.mitosis();
-				continue;
-			} else if (world.getMap().at(c.getPos()).getType()
-					.equals(Constants.BLOCK_TYPE_RESOURCE)
-					&& world.getMap().at(c.getPos()).getResource() > 0) {
-				if (c.getEnergy() < Constants.CELL_MIN_ENERGY_FOR_MITOSIS) {
-					c.gainResource();
-					continue;
-				} else if (c.getEnergy() < Constants.CELL_MAX_ENERGY) {
-					if (isVisitedBy(c.getId(), c.getPos().x, c.getPos().y) > 3
-							|| world.getTurn() > 400)
-						c.gainResource();
-					continue;
-				}
-
-			}
+			// if (world.getMap().at(c.getPos()).getType()
+			// .equals(Constants.BLOCK_TYPE_MITOSIS)
+			// && c.getEnergy() >= Constants.CELL_MIN_ENERGY_FOR_MITOSIS) {
+			// c.mitosis();
+			// continue;
+			// } else if (world.getMap().at(c.getPos()).getType()
+			// .equals(Constants.BLOCK_TYPE_RESOURCE)
+			// && world.getMap().at(c.getPos()).getResource() > 0) {
+			// if (c.getEnergy() < Constants.CELL_MIN_ENERGY_FOR_MITOSIS) {
+			// c.gainResource();
+			// continue;
+			// } else if (c.getEnergy() < Constants.CELL_MAX_ENERGY) {
+			// if (isVisitedBy(c.getId(), c.getPos().x, c.getPos().y) > 3
+			// || world.getTurn() > 400)
+			// c.gainResource();
+			// continue;
+			// }
+			//
+			// }
 
 			// BFS part
 			// Vector<Position> vis = new Vector<Position>();
@@ -408,7 +440,7 @@ public class AI {
 					}
 					if (myvisite <= 0 && nextInf.inChale == false
 							&& !nextInf.isNoneBlock) {
-						addVisited(c.getId(), b.getPos().x, b.getPos().y, 1);
+						addVisited(c.getId(), b.getPos().x, b.getPos().y, 1,world.getTurn());
 
 					}
 
@@ -448,6 +480,29 @@ public class AI {
 
 			}
 
+			for (Cell c1 : world.getMyCells()) {
+				// System.out.println(c.getId());
+				if (world.getMap().at(c1.getPos()).getType()
+						.equals(Constants.BLOCK_TYPE_MITOSIS)
+						&& c1.getEnergy() >= Constants.CELL_MIN_ENERGY_FOR_MITOSIS) {
+					c1.mitosis();
+					continue;
+				} else if (world.getMap().at(c1.getPos()).getType()
+						.equals(Constants.BLOCK_TYPE_RESOURCE)
+						&& world.getMap().at(c1.getPos()).getResource() > 0) {
+					if (c1.getEnergy() < Constants.CELL_MIN_ENERGY_FOR_MITOSIS) {
+						c1.gainResource();
+						continue;
+					} else if (c1.getEnergy() < Constants.CELL_MAX_ENERGY) {
+						if (isVisitedBy(c1.getId(), c1.getPos().x,
+								c1.getPos().y) > 3 || world.getTurn() > 400)
+							c1.gainResource();
+						continue;
+					}
+
+				}
+			}
+
 			try {
 				c.move(last_direction);
 				// System.out.println("ID : " + c.getId() + " DIR : "
@@ -458,6 +513,32 @@ public class AI {
 			}
 
 		}
+	}
+	public static int getHeightBlock(Position p,World world){
+		Block b = world.getMap().at(p); 
+		if (b.getType() == Constants.BLOCK_TYPE_RESOURCE)
+			return Math.min(9, b.getHeight()+b.getResource()/50);
+		else
+			return b.getHeight();
+	}
+	
+	
+	public static int getHeightResourceAfterGain(Position p,World world,int gainResource){
+		Block b = world.getMap().at(p);
+		int res = Math.min(gainResource, b.getResource());
+		
+		return Math.min(9, b.getHeight()+(b.getResource()-res)/50);
+	}
+	
+	
+	public static boolean canMoveAfterGainRes(Cell c,Direction d,World world){
+		Block khodam = world.getMap().at(c.getPos());
+		Block destin = world.getMap().at(c.getPos().getNextPos(d));
+		int resourceHeightAfftergain = getHeightResourceAfterGain(khodam.getPos(), world, c.getGainRate());
+		if (resourceHeightAfftergain-getHeightBlock(destin.getPos(), world)>-1*c.getJump()){
+			return true;
+		}
+		return false;
 	}
 
 	public static boolean visited(Position chk, Vector<Position> pos) {
@@ -530,6 +611,16 @@ class info {
 	public info() {
 	}
 
+}
+
+class enamyFound {
+	public short FoundedEnamy;
+	public Direction attackDirection;
+	public short enamyEnergy = 0;
+
+	public enamyFound() {
+		FoundedEnamy = 0;
+	}
 }
 
 class visitedInfo {
