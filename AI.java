@@ -480,33 +480,32 @@ public class AI {
 
 			}
 
-			for (Cell c1 : world.getMyCells()) {
 				// System.out.println(c.getId());
-				if (world.getMap().at(c1.getPos()).getType()
+				if (world.getMap().at(c.getPos()).getType()
 						.equals(Constants.BLOCK_TYPE_MITOSIS)
-						&& c1.getEnergy() >= Constants.CELL_MIN_ENERGY_FOR_MITOSIS) {
-					c1.mitosis();
+						&& c.getEnergy() >= Constants.CELL_MIN_ENERGY_FOR_MITOSIS) {
+					c.mitosis();
 					continue;
-				} else if (world.getMap().at(c1.getPos()).getType()
+				} else if (world.getMap().at(c.getPos()).getType()
 						.equals(Constants.BLOCK_TYPE_RESOURCE)
-						&& world.getMap().at(c1.getPos()).getResource() > 0) {
-					if (c1.getEnergy() < Constants.CELL_MIN_ENERGY_FOR_MITOSIS) {
-						c1.gainResource();
+						&& world.getMap().at(c.getPos()).getResource() > 0) {
+					if (c.getEnergy() < Constants.CELL_MIN_ENERGY_FOR_MITOSIS) {
+						c.gainResource();
 						continue;
-					} else if (c1.getEnergy() < Constants.CELL_MAX_ENERGY) {
-						if (isVisitedBy(c1.getId(), c1.getPos().x,
-								c1.getPos().y) > 3 || world.getTurn() > 400)
-							c1.gainResource();
+					} else if (c.getEnergy() < Constants.CELL_MAX_ENERGY) {
+						if (isVisitedBy(c.getId(), c.getPos().x,
+								c.getPos().y) > 3 || world.getTurn() > 400)
+							c.gainResource();
 						continue;
 					}
 
 				}
-			}
+			
 
 			try {
 				c.move(last_direction);
-				// System.out.println("ID : " + c.getId() + " DIR : "
-				// + last_direction);
+				 System.out.println("ID : " + c.getId() + " DIR : "
+				 + last_direction);
 			} catch (Exception e) {
 				continue;
 				// System.out.println("eeeeeeeeeeeeeeeeeeeeee");
