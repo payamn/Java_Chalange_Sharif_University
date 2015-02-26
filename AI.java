@@ -308,7 +308,7 @@ public class AI {
 						continue;
 
 					// System.out.println(inf.pos.getNextPos(d).y+" x: "+inf.pos.getNextPos(d).x);
-					if (!isPossible(inf.pos, d, world,c.getJump())
+					if (!isPossible(inf.pos, d, world,c.getJump(),world)	
 							&& !b.getType().equals(Constants.BLOCK_TYPE_NONE))
 						continue;
 
@@ -370,16 +370,10 @@ public class AI {
 						score -= 5;
 					}
 					// check for height
-					if (b.getPos().x == 10 && b.getPos().y == 7) {
-						System.out.println("chera vaghan type: " + b.getType()
-								+ " ertefa b: " + b.getHeight() + " inf: "
-								+ world.getMap().at(inf.pos).getHeight()
-								+ " turn: " + world.getTurn());
-					}
-
+					System.out.println(c.getJump());
 					if (!b.getType().equals(Constants.BLOCK_TYPE_NONE)
-							&& b.getHeight()
-									- world.getMap().at(inf.pos).getHeight() < -1*c.getJump()) {
+							&& getHeightBlock(b.getPos(), world) 
+									-  getHeightBlock(world.getMap().at(inf.pos).getPos(), world) < -1*c.getJump()) {
 						if (!visitedMapArray[inf.pos.x][inf.pos.y]
 								.getAble2move(d)
 								&& connected(c.getId(), b.getPos().x,
@@ -497,12 +491,12 @@ public class AI {
 				} else if (world.getMap().at(c.getPos()).getType()
 						.equals(Constants.BLOCK_TYPE_RESOURCE)
 						&& world.getMap().at(c.getPos()).getResource() > 0) {
-					if (c.getEnergy() < Constants.CELL_MIN_ENERGY_FOR_MITOSIS) {
+					System.out.println(canMoveAfterGainRes(c, last_direction, world));
+					if (c.getEnergy() < Constants.CELL_MIN_ENERGY_FOR_MITOSIS &&canMoveAfterGainRes(c, last_direction, world)) {
 						c.gainResource();
 						continue;
 					} else if (c.getEnergy() < Constants.CELL_MAX_ENERGY) {
-						if (isVisitedBy(c.getId(), c.getPos().x,
-								c.getPos().y) > 3 || world.getTurn() > 400)
+						if (world.getTurn() > 400)
 							c.gainResource();
 						continue;
 					}
@@ -578,11 +572,11 @@ public class AI {
 	// return true;
 	// }
 
-	public static boolean isPossible(Position last, Direction d, World w,int jump) {
+	public static boolean isPossible(Position last, Direction d, World w,int jump,World world) {
 		// is it possible to go there? :|
 		try {
-			if (w.getMap().at(last.getNextPos(d)).getHeight()
-					- w.getMap().at(last).getHeight() > jump)
+			if (getHeightBlock(w.getMap().at(last.getNextPos(d)).getPos(), world)
+					- getHeightBlock(w.getMap().at(last).getPos(), world) >= jump)
 				return false;
 		} catch (Exception e) {
 
