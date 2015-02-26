@@ -59,11 +59,11 @@ public class AI {
 	private enamyFound bestAttackDirecation(Position p) {
 		enamyFound myEnam = new enamyFound();
 		myEnam.enamyEnergy = Short.MAX_VALUE;
-		
-		for (int en : enamyCells.keySet()){
-			System.out.println("x= "+en%1000+" y: "+en/1000);
+
+		for (int en : enamyCells.keySet()) {
+			System.out.println("x= " + en % 1000 + " y: " + en / 1000);
 		}
-		
+
 		for (Direction d : Direction.values()) {
 			if (enamyCells.containsKey(p.getNextPos(d).x + p.getNextPos(d).y
 					* 1000)) {
@@ -231,7 +231,9 @@ public class AI {
 		for (Cell c : world.getEnemyCells()) {
 			enamyCells.put(c.getPos().x + c.getPos().y * 1000,
 					(short) c.getEnergy());
-			System.out.println("enargy cell: "+enamyCells.get(c.getPos().x + c.getPos().y * 1000)+" "+c.getEnergy());
+			System.out.println("enargy cell: "
+					+ enamyCells.get(c.getPos().x + c.getPos().y * 1000) + " "
+					+ c.getEnergy());
 		}
 		// System.out.println(world.getTurn());
 		if (world.getTurn() >= 340) {
@@ -298,6 +300,28 @@ public class AI {
 						b = world.getMap().at(inf.pos.getNextPos(d));
 					} catch (Exception e) {
 						continue;
+					}
+					if (lvl == 1) {
+						enamyFound en = bestAttackDirecation(b.getPos());
+						if (en.FoundedEnamy > 0) {
+							if (en.FoundedEnamy > 1)
+								score -= 123000;
+							if (en.enamyEnergy < c.getAttack()
+									&& c.getEnergy() > 34)
+								score += 10000;
+							else {
+								score -= 12000;
+							}
+						}
+					}
+					else{
+						enamyFound en = bestAttackDirecation(b.getPos());
+						if (en.FoundedEnamy > 0) {
+							if (en.enamyEnergy < c.getAttack()
+									&& c.getEnergy() > 34)
+								score += 1000;
+
+						}
 					}
 					info checkFather = new info();
 					checkFather = inf;
@@ -377,18 +401,22 @@ public class AI {
 						score -= 5;
 					}
 					// check for height
-					//System.out.println(c.getJump());
-					if ((!b.getType().equals(Constants.BLOCK_TYPE_NONE)
-							&& getHeightBlock(b.getPos(), world)
-									- getHeightBlock(world.getMap().at(inf.pos)
-											.getPos(), world) < -1
-									* c.getJump()   )||
-									(trapResources.containsKey(b.getPos().x+b.getPos().y*1000)&&trapResources.get(b.getPos().x+b.getPos().y*1000)<=c.getJump())) {
+					// System.out.println(c.getJump());
+					if ((!b.getType().equals(Constants.BLOCK_TYPE_NONE) && getHeightBlock(
+							b.getPos(), world)
+							- getHeightBlock(world.getMap().at(inf.pos)
+									.getPos(), world) < -1 * c.getJump())
+							|| (trapResources.containsKey(b.getPos().x
+									+ b.getPos().y * 1000) && trapResources
+									.get(b.getPos().x + b.getPos().y * 1000) <= c
+									.getJump())) {
 						if ((!visitedMapArray[inf.pos.x][inf.pos.y]
-								.getAble2move(d)
-								&& connected(c.getId(), b.getPos().x,
-										b.getPos().y) == false  ) ||
-												(trapResources.containsKey(b.getPos().x+b.getPos().y*1000)&&trapResources.get(b.getPos().x+b.getPos().y*1000)<=c.getJump())) {
+								.getAble2move(d) && connected(c.getId(),
+								b.getPos().x, b.getPos().y) == false)
+								|| (trapResources.containsKey(b.getPos().x
+										+ b.getPos().y * 1000) && trapResources
+										.get(b.getPos().x + b.getPos().y * 1000) <= c
+										.getJump())) {
 							nextInf.inChale = true;
 							score -= 200;
 							// }
@@ -422,7 +450,7 @@ public class AI {
 							inf.pos.getNextPos(d).x, inf.pos.getNextPos(d).y);
 					if (myvisite > 0) {
 						// System.out.println(visited);
-						score -= 100 * myvisite;
+						score -= 4 *(500- myvisite);
 					} else if (myvisite == -1) {
 						score -= 90;
 					}
@@ -501,29 +529,35 @@ public class AI {
 					c.gainResource();
 					continue;
 				} else if (c.getEnergy() < Constants.CELL_MAX_ENERGY) {
-					if (world.getTurn() > 400){
+					if (world.getTurn() > 400) {
 						c.gainResource();
 						continue;
-					}
-					else if (canMoveAfterGainRes(c, last_direction, world)==false){
+					} else if (canMoveAfterGainRes(c, last_direction, world) == false) {
 						System.out.println("in can move");
-						if (!trapResources.containsKey(c.getPos().x+c.getPos().y*1000))
-							trapResources.put(c.getPos().x+c.getPos().y*1000, c.getJump());
+						if (!trapResources.containsKey(c.getPos().x
+								+ c.getPos().y * 1000))
+							trapResources.put(c.getPos().x + c.getPos().y
+									* 1000, c.getJump());
 						else
-							trapResources.put(c.getPos().x+c.getPos().y*1000, Math.max(c.getJump(), trapResources.get(c.getPos().x+c.getPos().y*1000)));
+							trapResources.put(
+									c.getPos().x + c.getPos().y * 1000,
+									Math.max(
+											c.getJump(),
+											trapResources.get(c.getPos().x
+													+ c.getPos().y * 1000)));
 					}
 
 				}
-			
+
 			}
 			System.out.println("my enamy:");
-			for (Cell cc: world.getEnemyCells()){
-				System.out.println(cc.getPos().x+" y: "+cc.getPos().y);
+			for (Cell cc : world.getEnemyCells()) {
+				System.out.println(cc.getPos().x + " y: " + cc.getPos().y);
 			}
 			enamyFound enamyFoundNear = bestAttackDirecation(c.getPos());
 			if (enamyFoundNear.FoundedEnamy > 0) {
-				
-				System.out.println("attacking "+enamyFoundNear.FoundedEnamy);
+
+				System.out.println("attacking " + enamyFoundNear.FoundedEnamy);
 				attack(c, enamyFoundNear.attackDirection, c.getPos()
 						.getNextPos(enamyFoundNear.attackDirection));
 				continue;
@@ -531,8 +565,8 @@ public class AI {
 
 			try {
 				c.move(last_direction);
-			//	System.out.println("ID : " + c.getId() + " DIR : "
-			//			+ last_direction);
+				// System.out.println("ID : " + c.getId() + " DIR : "
+				// + last_direction);
 			} catch (Exception e) {
 				continue;
 				// System.out.println("eeeeeeeeeeeeeeeeeeeeee");
@@ -644,7 +678,7 @@ class info {
 }
 
 class enamyFound {
-	public short FoundedEnamy=0;
+	public short FoundedEnamy = 0;
 	public Direction attackDirection;
 	public short enamyEnergy = 0;
 
