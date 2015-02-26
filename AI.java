@@ -1,28 +1,18 @@
 package client;
 
-import client.model.Block;
-import client.model.Cell;
-import common.model.Direction;
-import common.model.Position;
-import common.util.Constants;
-import common.util.ServerConstants;
-
-import java.beans.DesignMode;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Random;
-import java.util.Set;
-import java.util.Timer;
 import java.util.Vector;
 
-import javax.swing.plaf.basic.BasicInternalFrameTitlePane.MaximizeAction;
+import client.model.Block;
+import client.model.Cell;
 
-import com.sun.corba.se.impl.orbutil.closure.Constant;
-import com.sun.org.apache.bcel.internal.generic.NEW;
-import com.sun.org.apache.xpath.internal.operations.Bool;
-import com.sun.xml.internal.fastinfoset.algorithm.BuiltInEncodingAlgorithm.WordListener;
+import common.model.Direction;
+import common.model.Position;
+import common.util.Constants;
 
 /**
  * AI class. You should fill body of the method {@link #doTurn}. Do not change
@@ -362,7 +352,7 @@ public class AI {
 						// MitosisBlocks.add(inf.pos.getNextPos(d));
 
 						if (c.getEnergy() >= Constants.CELL_MIN_ENERGY_FOR_MITOSIS) {
-							score += 120000 / lvl;
+							score += 1200000 / lvl;
 						}
 
 					} else if (b.getType()
@@ -456,7 +446,7 @@ public class AI {
 							inf.pos.getNextPos(d).x, inf.pos.getNextPos(d).y);
 					if (myvisite > 0) {
 						// System.out.println(visited);
-						score -= 4 * (500 - myvisite);
+						score -= myvisite*100;
 					} else if (myvisite == -1) {
 						score -= 90;
 					}
