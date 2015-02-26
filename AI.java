@@ -21,9 +21,9 @@ import common.util.Constants;
  * state of the game.
  */
 public class AI {
-
+	private static HashSet<Integer> willVisit = null;
 	private static boolean avoidChale = true;
-	private static final int MAX_LEVEL = 5;
+	private static final int MAX_LEVEL = 6;
 	private static HashMap<Integer, Short> enamyCells = null;
 	private static HashSet<Integer> MitosisBlocks = new HashSet<Integer>();
 	private static Vector<Position> ResourceBlocks = new Vector<Position>();
@@ -206,6 +206,7 @@ public class AI {
 	// }
 
 	public void doTurn(World world) {
+		willVisit = new HashSet<Integer>();
 		if (visitedMapArray == null) {
 			Class c = new visitedInfo().getClass();
 			visitedInfo[] a0 = (visitedInfo[]) java.lang.reflect.Array
@@ -437,14 +438,7 @@ public class AI {
 						// continue;
 						boolean skip = false;
 
-						for (Cell c1 : world.getMyCells()) {
-							if (c1.getPos().x == inf.pos.getNextPos(d).x
-									&& c1.getPos().y == inf.pos.getNextPos(d).y) {
-								skip = true;
-								break;
-							}
-						}
-						if (skip)
+						if (willVisit.contains(inf.pos.getNextPos(d).x+inf.pos.getNextPos(d).y*1000))
 							continue;
 					}
 
@@ -520,6 +514,7 @@ public class AI {
 					.equals(Constants.BLOCK_TYPE_MITOSIS)
 					&& c.getEnergy() >= Constants.CELL_MIN_ENERGY_FOR_MITOSIS) {
 				c.mitosis();
+				willVisit.add(c.getPos().x+c.getPos().y*1000);
 				continue;
 			} else if (world.getMap().at(c.getPos()).getType()
 					.equals(Constants.BLOCK_TYPE_RESOURCE)
@@ -529,10 +524,12 @@ public class AI {
 				if (c.getEnergy() < Constants.CELL_MIN_ENERGY_FOR_MITOSIS
 						&& canMoveAfterGainRes(c, last_direction, world)) {
 					c.gainResource();
+					willVisit.add(c.getPos().x+c.getPos().y*1000);
 					continue;
 				} else if (c.getEnergy() < Constants.CELL_MAX_ENERGY) {
 					if (world.getTurn() > 400) {
 						c.gainResource();
+						willVisit.add(c.getPos().x+c.getPos().y*1000);
 						continue;
 					} else if (canMoveAfterGainRes(c, last_direction, world) == false) {
 						System.out.println("in can move");
@@ -559,10 +556,12 @@ public class AI {
 				System.out.println("attacking " + enamyFoundNear.FoundedEnamy);
 				attack(c, enamyFoundNear.attackDirection, c.getPos()
 						.getNextPos(enamyFoundNear.attackDirection));
+				willVisit.add(c.getPos().x+c.getPos().y*1000);
 				continue;
 			}
 
 			try {
+				willVisit.add(c.getPos().getNextPos(last_direction).x+c.getPos().getNextPos(last_direction).y*1000);
 				c.move(last_direction);
 				// System.out.println("ID : " + c.getId() + " DIR : "
 				// + last_direction);
