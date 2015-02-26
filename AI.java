@@ -19,6 +19,8 @@ import java.util.Vector;
 
 import javax.swing.plaf.basic.BasicInternalFrameTitlePane.MaximizeAction;
 
+
+
 import com.sun.corba.se.impl.orbutil.closure.Constant;
 import com.sun.org.apache.bcel.internal.generic.NEW;
 import com.sun.org.apache.xpath.internal.operations.Bool;
@@ -33,7 +35,7 @@ import com.sun.xml.internal.fastinfoset.algorithm.BuiltInEncodingAlgorithm.WordL
 public class AI {
 
 	private static boolean avoidChale = true;
-	private static final int MAX_LEVEL = 12;
+	private static final int MAX_LEVEL = 5;
 	private static HashMap<Integer, Short> enamyCells = null;
 	private static HashSet<Integer> MitosisBlocks = new HashSet<Integer>();
 	private static Vector<Position> ResourceBlocks = new Vector<Position>();
@@ -48,6 +50,11 @@ public class AI {
 
 	Random rnd = new Random();
 
+	private void attack(Cell mine, Direction d, Position attack_pos){
+		int id = attack_pos.x+attack_pos.y*1000;
+		enamyCells.put(id,(short) (enamyCells.get(id)-mine.getAttack()));
+		mine.attack(d);
+	}
 	private enamyFound bestAttackDirecation(Position p) {
 		enamyFound myEnam = new enamyFound();
 		myEnam.enamyEnergy = Short.MAX_VALUE;
@@ -55,7 +62,8 @@ public class AI {
 			if (enamyCells.containsKey(p.getNextPos(d).x + p.getNextPos(d).y
 					* 1000)) {
 				if (enamyCells
-						.get(p.getNextPos(d).x + p.getNextPos(d).y * 1000) < myEnam.enamyEnergy) {
+						.get(p.getNextPos(d).x + p.getNextPos(d).y * 1000) < myEnam.enamyEnergy&& enamyCells
+						.get(p.getNextPos(d).x + p.getNextPos(d).y * 1000)>0 ) {
 					myEnam.FoundedEnamy += 1;
 					myEnam.enamyEnergy = enamyCells.get(p.getNextPos(d).x
 							+ p.getNextPos(d).y * 1000);
@@ -300,7 +308,7 @@ public class AI {
 						continue;
 
 					// System.out.println(inf.pos.getNextPos(d).y+" x: "+inf.pos.getNextPos(d).x);
-					if (!isPossible(inf.pos, d, world)
+					if (!isPossible(inf.pos, d, world,c.getJump())
 							&& !b.getType().equals(Constants.BLOCK_TYPE_NONE))
 						continue;
 
@@ -371,7 +379,7 @@ public class AI {
 
 					if (!b.getType().equals(Constants.BLOCK_TYPE_NONE)
 							&& b.getHeight()
-									- world.getMap().at(inf.pos).getHeight() < -2) {
+									- world.getMap().at(inf.pos).getHeight() < -1*c.getJump()) {
 						if (!visitedMapArray[inf.pos.x][inf.pos.y]
 								.getAble2move(d)
 								&& connected(c.getId(), b.getPos().x,
@@ -570,11 +578,11 @@ public class AI {
 	// return true;
 	// }
 
-	public static boolean isPossible(Position last, Direction d, World w) {
+	public static boolean isPossible(Position last, Direction d, World w,int jump) {
 		// is it possible to go there? :|
 		try {
 			if (w.getMap().at(last.getNextPos(d)).getHeight()
-					- w.getMap().at(last).getHeight() > 2)
+					- w.getMap().at(last).getHeight() > jump)
 				return false;
 		} catch (Exception e) {
 
