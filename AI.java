@@ -32,7 +32,7 @@ import com.sun.xml.internal.fastinfoset.algorithm.BuiltInEncodingAlgorithm.WordL
 public class AI {
 
 	private static boolean avoidChale = true;
-	private static final int MAX_LEVEL = 7;
+	private static final int MAX_LEVEL = 12;
 	private static HashSet<Integer> MitosisBlocks = new HashSet<Integer>();
 	private static Vector<Position> ResourceBlocks = new Vector<Position>();
 	private static Vector<Position> notFound = new Vector<Position>();
@@ -52,28 +52,28 @@ public class AI {
 		// visit it before
 		if (visitedMapArray[x][y].visitedBy.containsKey(id))
 			return visitedMapArray[x][y].visitedBy.get(id);
-		if (visitedMapArray[x][y].visitedBy.keySet().size()>0){
+		if (visitedMapArray[x][y].visitedBy.keySet().size() > 0) {
 			return -1;
 		}
 		return 0;
-//		if (visitedMap.containsKey(x)) {
-//			HashMap<Integer, HashMap<String, Integer>> a = visitedMap.get(x);
-//			if (a.containsKey(y)) {
-//				HashMap<String, Integer> a1 = a.get(y);
-//				if (a1.containsKey(id)) {
-//
-//					return a1.get(id);
-//				} else {
-//					return -1;
-//				}
-//			}
-//		}
-//		return 0;
+		// if (visitedMap.containsKey(x)) {
+		// HashMap<Integer, HashMap<String, Integer>> a = visitedMap.get(x);
+		// if (a.containsKey(y)) {
+		// HashMap<String, Integer> a1 = a.get(y);
+		// if (a1.containsKey(id)) {
+		//
+		// return a1.get(id);
+		// } else {
+		// return -1;
+		// }
+		// }
+		// }
+		// return 0;
 	}
 
 	private Boolean connected(String id, int x, int y) {
 		// System.out.println("-0-0-0-0-0- in conected");
-		if (visitedMapArray[x][y].visitedBy.keySet().size()>0){
+		if (visitedMapArray[x][y].visitedBy.keySet().size() > 0) {
 			for (String bb : visitedMapArray[x][y].visitedBy.keySet())
 				if (isConnected.containsKey(bb)) {
 					HashMap<String, Boolean> ss = isConnected.get(bb);
@@ -88,84 +88,83 @@ public class AI {
 
 				}
 		}
-//		}
-//		if (visitedMap.containsKey(x)) {
-//			HashMap<Integer, HashMap<String, Integer>> a = visitedMap.get(x);
-//			if (a.containsKey(y)) {
-//				HashMap<String, Integer> a1 = a.get(y);
-//				for (String bb : a1.keySet()) {
-//					// System.out.println(bb);
-//					if (isConnected.containsKey(bb)) {
-//						HashMap<String, Boolean> ss = isConnected.get(bb);
-//						// System.out.println(bb + "found one");
-//						if (ss.containsKey(id))
-//							return true;
-//
-//					} else if (bb.equals(id)) {
-//						// System.out.println("khodama hastam" + x + y);
-//						return true; // ???????????????????? chera dorsot kar
-//										// nemikone :(
-//
-//					}
-//				}
-//			}
-//		}
+		// }
+		// if (visitedMap.containsKey(x)) {
+		// HashMap<Integer, HashMap<String, Integer>> a = visitedMap.get(x);
+		// if (a.containsKey(y)) {
+		// HashMap<String, Integer> a1 = a.get(y);
+		// for (String bb : a1.keySet()) {
+		// // System.out.println(bb);
+		// if (isConnected.containsKey(bb)) {
+		// HashMap<String, Boolean> ss = isConnected.get(bb);
+		// // System.out.println(bb + "found one");
+		// if (ss.containsKey(id))
+		// return true;
+		//
+		// } else if (bb.equals(id)) {
+		// // System.out.println("khodama hastam" + x + y);
+		// return true; // ???????????????????? chera dorsot kar
+		// // nemikone :(
+		//
+		// }
+		// }
+		// }
+		// }
 
 		return false;
 	}
 
 	private void addVisited(String id, int x, int y, int status) {
-		
-		if (visitedMapArray[x][y].visitedBy.containsKey(id)){
-			visitedMapArray[x][y].visitedBy.put(id, visitedMapArray[x][y].visitedBy.get(id)+status);
+
+		if (visitedMapArray[x][y].visitedBy.containsKey(id)) {
+			visitedMapArray[x][y].visitedBy.put(id,
+					visitedMapArray[x][y].visitedBy.get(id) + status);
+		} else {
+			visitedMapArray[x][y].visitedBy.put(id, status);
 		}
-		else{
-			visitedMapArray[x][y].visitedBy.put(id,status);
-		}
-		
-		
-		
+
 		// System.out.println("added x: " + x + " added y: " + y);
-//		if (visitedMap.containsKey(x)) {
-//			HashMap<Integer, HashMap<String, Integer>> a = visitedMap.get(x);
-//			if (a.containsKey(y)) {
-//				HashMap<String, Integer> a1 = a.get(y);
-//				if (a1.containsKey(id)) {
-//					// if (a1.get(id) == 20)
-//					// avoidChale = false;
-//
-//					a1.put(id, a1.get(id) + status);
-//					a.put(y, a1);
-//					visitedMap.put(x, a);
-//				} else {
-//					for (String komaki : a1.keySet()) {
-//						HashMap<String, Boolean> added1 = new HashMap<String, Boolean>();
-//						added1.put(komaki, true);
-//						HashMap<String, Boolean> added2 = new HashMap<String, Boolean>();
-//						added2.put(id, true);
-//						isConnected.put(komaki, added2);
-//						isConnected.put(id, added1);
-//
-//					}
-//					a1.put(id, status);
-//					a.put(y, a1);
-//					visitedMap.put(x, a);
-//				}
-//			} else {
-//				HashMap<String, Integer> a1 = new HashMap<String, Integer>();
-//				a1.put(id, status);
-//				a.put(y, a1);
-//				visitedMap.put(x, a);
-//			}
-//		} else {
-//			HashMap<Integer, HashMap<String, Integer>> a = new HashMap<Integer, HashMap<String, Integer>>();
-//			HashMap<String, Integer> a1 = new HashMap<String, Integer>();
-//			a1.put(id, status);
-//			a.put(y, a1);
-//			visitedMap.put(x, a);
-//			// System.out.println("mamuli");
-//
-//		}
+		// if (visitedMap.containsKey(x)) {
+		// HashMap<Integer, HashMap<String, Integer>> a = visitedMap.get(x);
+		// if (a.containsKey(y)) {
+		// HashMap<String, Integer> a1 = a.get(y);
+		// if (a1.containsKey(id)) {
+		// // if (a1.get(id) == 20)
+		// // avoidChale = false;
+		//
+		// a1.put(id, a1.get(id) + status);
+		// a.put(y, a1);
+		// visitedMap.put(x, a);
+		// } else {
+		// for (String komaki : a1.keySet()) {
+		// HashMap<String, Boolean> added1 = new HashMap<String, Boolean>();
+		// added1.put(komaki, true);
+		// HashMap<String, Boolean> added2 = new HashMap<String, Boolean>();
+		// added2.put(id, true);
+		// isConnected.put(komaki, added2);
+		// isConnected.put(id, added1);
+		//
+		// }
+		// a1.put(id, status);
+		// a.put(y, a1);
+		// visitedMap.put(x, a);
+		// }
+		// } else {
+		// HashMap<String, Integer> a1 = new HashMap<String, Integer>();
+		// a1.put(id, status);
+		// a.put(y, a1);
+		// visitedMap.put(x, a);
+		// }
+		// } else {
+		// HashMap<Integer, HashMap<String, Integer>> a = new HashMap<Integer,
+		// HashMap<String, Integer>>();
+		// HashMap<String, Integer> a1 = new HashMap<String, Integer>();
+		// a1.put(id, status);
+		// a.put(y, a1);
+		// visitedMap.put(x, a);
+		// // System.out.println("mamuli");
+		//
+		// }
 	}
 
 	public void doTurn(World world) {
@@ -177,12 +176,13 @@ public class AI {
 					.newInstance(a0.getClass(),
 							world.getMapSize().getWidth() + 1);
 			for (int i = 0; i < world.getMapSize().getWidth(); i++) {
-				visitedMapArray[i] = (visitedInfo[])java.lang.reflect.Array.newInstance(c, world.getMapSize().getHeight()+1);
+				visitedMapArray[i] = (visitedInfo[]) java.lang.reflect.Array
+						.newInstance(c, world.getMapSize().getHeight() + 1);
 			}
-			
+
 			for (int i = 0; i < world.getMapSize().getWidth(); i++) {
 				for (int j = 0; j < world.getMapSize().getHeight(); j++) {
-					visitedMapArray[i][j]= new visitedInfo();
+					visitedMapArray[i][j] = new visitedInfo();
 				}
 			}
 
@@ -336,21 +336,30 @@ public class AI {
 								+ world.getMap().at(inf.pos).getHeight()
 								+ " turn: " + world.getTurn());
 					}
+
 					if (!b.getType().equals(Constants.BLOCK_TYPE_NONE)
 							&& b.getHeight()
-									- world.getMap().at(inf.pos).getHeight() < -2
-							&& connected(c.getId(), b.getPos().x, b.getPos().y) == false) {
-						System.out.println(b.getType().equals(
-								Constants.BLOCK_TYPE_NONE)
-								+ "****im in none if turn: " + world.getTurn());
-						// if (world.getMyCells().size() == 1) {
-						// score -= 5000000; // never go there!
-						// } else {
-						System.out.println("inchale: x: " + b.getPos().x
-								+ " Y: " + b.getPos().y);
-						nextInf.inChale = true;
-						score -= 200;
-						// }
+									- world.getMap().at(inf.pos).getHeight() < -2) {
+						if (!visitedMapArray[inf.pos.x][inf.pos.y]
+								.getAble2move(d)
+								&& connected(c.getId(), b.getPos().x,
+										b.getPos().y) == false) {
+							System.out.println(b.getType().equals(
+									Constants.BLOCK_TYPE_NONE)
+									+ "****im in none if turn: "
+									+ world.getTurn());
+							// if (world.getMyCells().size() == 1) {
+							// score -= 5000000; // never go there!
+							// } else {
+							System.out.println("inchale: x: " + b.getPos().x
+									+ " Y: " + b.getPos().y);
+							nextInf.inChale = true;
+							score -= 200;
+							// }
+						} else {
+							visitedMapArray[inf.pos.x][inf.pos.y]
+									.setAble2move(d);
+						}
 					}
 
 					if (lvl == 1) {
@@ -523,16 +532,22 @@ class info {
 
 }
 
-class visitedInfo{
+class visitedInfo {
 	public HashMap<String, Integer> visitedBy;
-	public boolean [] able2move = new boolean[6];
+	public boolean[] able2move = new boolean[6];
+
 	public visitedInfo() {
 		visitedBy = new HashMap<String, Integer>();
 		for (int i = 0; i < 6; i++) {
 			able2move[i] = false;
 		}
 	}
-	public void setAble2move(Direction d){
+
+	public void setAble2move(Direction d) {
 		able2move[d.ordinal()] = true;
+	}
+
+	public boolean getAble2move(Direction d) {
+		return able2move[d.ordinal()];
 	}
 }
