@@ -60,22 +60,23 @@ public class AI {
 		enamyFound myEnam = new enamyFound();
 		myEnam.enamyEnergy = Short.MAX_VALUE;
 
-		for (int en : enamyCells.keySet()) {
-			System.out.println("x= " + en % 1000 + " y: " + en / 1000);
-		}
-
 		for (Direction d : Direction.values()) {
-			if (enamyCells.containsKey(p.getNextPos(d).x + p.getNextPos(d).y
-					* 1000)) {
-				if (enamyCells
-						.get(p.getNextPos(d).x + p.getNextPos(d).y * 1000) < myEnam.enamyEnergy
-						&& enamyCells.get(p.getNextPos(d).x + p.getNextPos(d).y
-								* 1000) >= 0) {
-					myEnam.FoundedEnamy += 1;
-					myEnam.enamyEnergy = enamyCells.get(p.getNextPos(d).x
-							+ p.getNextPos(d).y * 1000);
-					myEnam.attackDirection = d;
+			try {
+				if (enamyCells.containsKey(p.getNextPos(d).x
+						+ p.getNextPos(d).y * 1000)) {
+					if (enamyCells.get(p.getNextPos(d).x + p.getNextPos(d).y
+							* 1000) < myEnam.enamyEnergy
+							&& enamyCells.get(p.getNextPos(d).x
+									+ p.getNextPos(d).y * 1000) >= 0) {
+						myEnam.FoundedEnamy += 1;
+						myEnam.enamyEnergy = enamyCells.get(p.getNextPos(d).x
+								+ p.getNextPos(d).y * 1000);
+						myEnam.attackDirection = d;
+					}
 				}
+
+			} catch (Exception e) {
+				continue;
 			}
 
 		}
@@ -151,17 +152,24 @@ public class AI {
 		return false;
 	}
 
-	private void addVisited(String id, int x, int y, int status, int turn) {
-		if (status == 1) {
-			visitedMapArray[x][y].visitedBy.put(id, 1);
+	private void addVisited(String id, int x, int y, int status) {
+		if (visitedMapArray[x][y].visitedBy.containsKey(id)) {
+			visitedMapArray[x][y].visitedBy.put(id,
+					visitedMapArray[x][y].visitedBy.get(id) + status);
 		} else {
-			if (visitedMapArray[x][y].visitedBy.containsKey(id)) {
-				visitedMapArray[x][y].visitedBy.put(id, turn);
-			} else {
-				visitedMapArray[x][y].visitedBy.put(id, turn);
-			}
-
+			visitedMapArray[x][y].visitedBy.put(id, status);
 		}
+
+		// if (status == 1) {
+		// visitedMapArray[x][y].visitedBy.put(id, 1);
+		// } else {
+		// if (visitedMapArray[x][y].visitedBy.containsKey(id)) {
+		// visitedMapArray[x][y].visitedBy.put(id, turn);
+		// } else {
+		// visitedMapArray[x][y].visitedBy.put(id, turn);
+		// }
+		//
+		// }
 	}
 
 	// System.out.println("added x: " + x + " added y: " + y);
@@ -240,8 +248,7 @@ public class AI {
 			avoidChale = false;
 		}
 		for (Cell c : world.getMyCells()) {
-			addVisited(c.getId(), c.getPos().x, c.getPos().y, 2,
-					world.getTurn());
+			addVisited(c.getId(), c.getPos().x, c.getPos().y, 2);
 		}
 
 		for (Cell c : world.getMyCells()) {
@@ -313,8 +320,7 @@ public class AI {
 								score -= 12000;
 							}
 						}
-					}
-					else{
+					} else {
 						enamyFound en = bestAttackDirecation(b.getPos());
 						if (en.FoundedEnamy > 0) {
 							if (en.enamyEnergy < c.getAttack()
@@ -450,7 +456,7 @@ public class AI {
 							inf.pos.getNextPos(d).x, inf.pos.getNextPos(d).y);
 					if (myvisite > 0) {
 						// System.out.println(visited);
-						score -= 4 *(500- myvisite);
+						score -= 4 * (500 - myvisite);
 					} else if (myvisite == -1) {
 						score -= 90;
 					}
@@ -472,8 +478,7 @@ public class AI {
 					}
 					if (myvisite <= 0 && nextInf.inChale == false
 							&& !nextInf.isNoneBlock) {
-						addVisited(c.getId(), b.getPos().x, b.getPos().y, 1,
-								world.getTurn());
+						addVisited(c.getId(), b.getPos().x, b.getPos().y, 1);
 
 					}
 
@@ -550,10 +555,7 @@ public class AI {
 				}
 
 			}
-			System.out.println("my enamy:");
-			for (Cell cc : world.getEnemyCells()) {
-				System.out.println(cc.getPos().x + " y: " + cc.getPos().y);
-			}
+
 			enamyFound enamyFoundNear = bestAttackDirecation(c.getPos());
 			if (enamyFoundNear.FoundedEnamy > 0) {
 
